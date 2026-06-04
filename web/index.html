@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telealpha — Painel do Gestor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    :root {
+      --primary: #003366;
+      --primary-light: #EBF4FF;
+      --success: #2A9D8F;
+      --accent: #E63946;
+      --bg: #F0F2F5;
+      --white: #fff;
+      --border: #E0E4E8;
+      --text: #2B2D42;
+      --text-muted: #6B7280;
+      --sidebar-w: 240px;
+      --radius: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ─── LOGIN ─── */
+    #login-page {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #003366 0%, #0055aa 100%);
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--white); border-radius: 20px;
+      padding: 44px 40px; width: 100%; max-width: 400px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
+    }
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo h1 { font-size: 30px; font-weight: 700; color: var(--primary); }
+    .login-logo p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+    /* ─── FORM ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-size: 14px; font-family: inherit; outline: none;
+      background: #F8F9FA; transition: border-color .2s, background .2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary); background: var(--white);
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px; border: none; border-radius: var(--radius);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all .18s; white-space: nowrap;
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:not(:disabled):hover { background: #004488; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:not(:disabled):hover { background: #238a7e; }
+    .btn-danger  { background: var(--accent); color: #fff; }
+    .btn-danger:not(:disabled):hover  { background: #c42d37; }
+    .btn-ghost   { background: transparent; color: var(--primary); border: 1.5px solid var(--border); }
+    .btn-ghost:not(:disabled):hover   { background: var(--primary-light); }
+    .btn-full    { width: 100%; justify-content: center; padding: 14px; }
+    .btn-sm      { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+    /* ─── LAYOUT ─── */
+    #dashboard { display: none; min-height: 100vh; }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--sidebar-w); background: var(--primary); color: #fff;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 200;
+      transition: transform .28s ease;
+    }
+    .sidebar-logo { padding: 26px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .sidebar-logo h2 { font-size: 20px; font-weight: 700; }
+    .sidebar-logo p { font-size: 12px; opacity: .65; margin-top: 3px; }
+
+    .sidebar-nav { padding: 12px 0; flex: 1; overflow-y: auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 14px 20px; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      transition: background .18s; border-right: 3px solid transparent;
+    }
+    .nav-item:hover   { background: rgba(255,255,255,.1); }
+    .nav-item.active  { background: rgba(255,255,255,.18); border-right-color: #fff; }
+    .nav-item svg     { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.12); }
+    .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .user-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,.2); overflow: hidden;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name  { font-size: 14px; font-weight: 600; }
+    .user-role  { font-size: 11px; opacity: .65; }
+
+    /* OVERLAY (mobile) */
+    #overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 199;
+    }
+
+    /* MAIN */
+    #main {
+      margin-left: var(--sidebar-w);
+      padding: 28px 30px;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px; gap: 12px; flex-wrap: wrap;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar h1  { font-size: 22px; font-weight: 700; color: var(--primary); }
+    #hamburger  {
+      display: none; background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--primary);
+    }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 9px 14px; flex: 1; min-width: 200px;
+    }
+    .search-box input { border: none; outline: none; font-size: 14px; font-family: inherit; width: 100%; background: transparent; }
+
+    /* PERIOD FILTER */
+    #period-bar { display: none; margin-bottom: 14px; }
+    .date-row   { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .date-box   {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 9px 14px; flex: 1; min-width: 160px;
+    }
+    .date-box label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+    .date-box input[type="date"] { border: none; outline: none; font-size: 13px; font-family: inherit; background: transparent; flex: 1; }
+    .sel-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--primary-light); border: 1.5px solid #B3D4F5;
+      border-radius: var(--radius); padding: 10px 16px;
+    }
+    .sel-bar-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--primary); cursor: pointer; }
+    .sel-bar-left input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; }
+
+    /* TABLE */
+    .table-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: var(--primary); color: #fff; padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #F8F9FA; }
+    .actions { display: flex; gap: 6px; }
+
+    /* BADGE */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-green  { background: #D1FAE5; color: #065F46; }
+    .badge-yellow { background: #FEF3C7; color: #92400E; }
+
+    /* ─── MODAL ─── */
+    .backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 500;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .backdrop.show { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px; padding: 28px;
+      width: 100%; max-width: 460px; max-height: 92vh; overflow-y: auto;
+      animation: popIn .2s ease;
+    }
+    .modal-lg { max-width: 700px; }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(18px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .modal-header h3 { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .modal-close { background: none; border: none; cursor: pointer; color: #aaa; line-height: 1; }
+    .modal-close:hover { color: #555; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+    /* PHOTOS */
+    .setor-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin: 16px 0 8px; }
+    .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .photo-wrap  { position: relative; }
+    .photo-wrap img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; display: block; cursor: pointer; background: #eee; }
+    .photo-no-web { width: 100%; height: 100px; border-radius: 10px; background: #F0F0F0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #999; font-size: 11px; }
+    .photo-del { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%; background: var(--white); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.2); color: var(--accent); font-size: 13px; font-weight: 700; }
+    .photo-del:hover { background: var(--accent); color: #fff; }
+
+    /* DETAIL */
+    .d-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .d-row:last-child { border-bottom: none; }
+    .d-label { width: 150px; flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .d-value { font-size: 13px; font-weight: 500; }
+    .km-box { background: var(--primary); color: #fff; border-radius: var(--radius); padding: 18px; text-align: center; margin: 18px 0; }
+    .km-box .lbl { font-size: 11px; opacity: .75; }
+    .km-box .val { font-size: 34px; font-weight: 700; }
+
+    /* TOAST */
+    #toasts { position: fixed; top: 18px; right: 18px; z-index: 9000; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: var(--white); border-radius: 12px; padding: 13px 18px; box-shadow: 0 4px 20px rgba(0,0,0,.14); font-size: 13px; font-weight: 500; border-left: 4px solid var(--success); min-width: 240px; animation: slideR .3s ease; }
+    .toast.err { border-left-color: var(--accent); }
+    @keyframes slideR { from { opacity: 0; transform: translateX(80px); } to { opacity: 1; transform: none; } }
+
+    /* LOADING / EMPTY */
+    .loading, .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; gap: 14px; color: var(--text-muted); }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FULLSCREEN */
+    #fullscreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.95); z-index: 9999; align-items: center; justify-content: center; }
+    #fullscreen.show { display: flex; }
+    #fullscreen img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 8px; }
+    #fs-close { position: absolute; top: 18px; right: 22px; background: none; border: none; color: #fff; font-size: 32px; cursor: pointer; line-height: 1; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 880px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: none; }
+      #overlay.show { display: block; }
+      #main { margin-left: 0; padding: 18px 16px; }
+      #hamburger { display: block; }
+
+      /* Stack table as cards */
+      .table-card { background: transparent; box-shadow: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tbody tr {
+        background: var(--white); border-radius: 14px; margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.07); border-left: 4px solid var(--primary); overflow: hidden;
+      }
+      tbody td { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+      tbody td:last-child { border-bottom: none; }
+      tbody td::before { content: attr(data-label); font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-right: 10px; flex-shrink: 0; }
+    }
+
+    @media (max-width: 500px) {
+      .date-row { flex-direction: column; }
+      .modal { padding: 20px 16px; }
+      .topbar h1 { font-size: 17px; }
+      .km-box .val { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toasts"></div>
+
+<!-- FULLSCREEN IMAGE -->
+<div id="fullscreen">
+  <button id="fs-close" onclick="closeFull()">✕</button>
+  <img id="fs-img" src="" alt="">
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════════════════════════════════
+     LOGIN
+══════════════════════════════════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>Telealpha</h1>
+      <p>Painel do Gestor</p>
+    </div>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="l-email" placeholder="gestor@telealpha.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="l-senha" placeholder="••••••" autocomplete="current-password">
+    </div>
+    <p id="l-erro" style="color:var(--accent);font-size:13px;margin-bottom:12px;display:none"></p>
+    <button class="btn btn-primary btn-full" id="btn-login" onclick="fazerLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════ -->
+<div id="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h2>Telealpha</h2>
+      <p>Painel do Gestor</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" id="nav-veiculos" onclick="mudarAba('veiculos')">
+        <svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/><path d="M14 3v4h5M3 11h18"/></svg>
+        Veículos
+      </div>
+      <div class="nav-item" id="nav-motoristas" onclick="mudarAba('motoristas')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Motoristas
+      </div>
+      <div class="nav-item" id="nav-relatorios" onclick="mudarAba('relatorios')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Relatórios
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="s-avatar">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="rgba(255,255,255,.7)" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <div class="user-name" id="s-nome">Gestor</div>
+          <div class="user-role">Administrador</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="sair()" style="color:#fff;border-color:rgba(255,255,255,.3)">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main id="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button id="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor" fill="none" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 id="t-title">Veículos</h1>
+      </div>
+      <button class="btn btn-primary" id="btn-novo" onclick="abrirNovo()" style="display:none">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="btn-novo-lbl">Novo</span>
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#999" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="busca" placeholder="Pesquisar..." oninput="filtrar()">
+      </div>
+    </div>
+
+    <!-- PERIOD BAR (relatórios) -->
+    <div id="period-bar">
+      <div class="date-row">
+        <div class="date-box">
+          <label>De</label>
+          <input type="date" id="d-ini" onchange="filtrar()">
+        </div>
+        <div class="date-box">
+          <label>Até</label>
+          <input type="date" id="d-fim" onchange="filtrar()">
+        </div>
+      </div>
+      <div class="sel-bar">
+        <label class="sel-bar-left">
+          <input type="checkbox" id="chk-all" onchange="toggleTodos()">
+          <span id="sel-lbl">Selecionar todos</span>
+        </label>
+        <button class="btn btn-primary btn-sm" id="btn-pdf" onclick="gerarPDF()" disabled>
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span id="pdf-lbl">Gerar PDF (0)</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="area">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ══ MODAL CRUD ══ -->
+<div class="backdrop" id="m-crud">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="m-crud-title">Novo Veículo</h3>
+      <button class="modal-close" onclick="closeModal('m-crud')">✕</button>
+    </div>
+    <div id="m-crud-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-crud')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL FOTOS ══ -->
+<div class="backdrop" id="m-fotos">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="m-fotos-title">Fotos do Veículo</h3>
+      <button class="modal-close" onclick="closeModal('m-fotos')">✕</button>
+    </div>
+    <div id="m-fotos-body"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL DETALHE ══ -->
+<div class="backdrop" id="m-det">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Detalhes da Rota</h3>
+      <button class="modal-close" onclick="closeModal('m-det')">✕</button>
+    </div>
+    <div id="m-det-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-det')">Fechar</button>
+      <button class="btn btn-danger" onclick="pdfIndividual()">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════
+const { createClient } = window.supabase;
+const sb = createClient(
+  'https://qnwpqmwuyhnsyzwjmdle.supabase.co',
+  'sb_publishable_RtTygttIwekWTyKqhtA0oA_08HOMOBq'
+);
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let usuario   = null;
+let aba       = 'veiculos';
+let brutos    = [];
+let filtrados = [];
+let sel       = new Set();
+let editando  = null;
+let detalhe   = null;
+let fotoPlaca = '';
+let fotoModelo= '';
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function toast(msg, tipo = 'ok') {
+  const el = document.createElement('div');
+  el.className = 'toast' + (tipo === 'err' ? ' err' : '');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3600);
+}
+
+function fmtDH(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtD(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+// FULLSCREEN
+// ══════════════════════════════════════
+function openFull(url) {
+  if (!url) return;
+  document.getElementById('fs-img').src = url;
+  document.getElementById('fullscreen').classList.add('show');
+}
+function closeFull() { document.getElementById('fullscreen').classList.remove('show'); }
+
+// ══════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════
+document.getElementById('l-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+document.getElementById('l-email').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+
+async function fazerLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const senha = document.getElementById('l-senha').value;
+  const erro  = document.getElementById('l-erro');
+  const btn   = document.getElementById('btn-login');
+
+  erro.style.display = 'none';
+  if (!email || !senha) { erro.textContent = 'Preencha todos os campos.'; erro.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Entrando...';
+
+  const { data, error } = await sb.from('usuarios')
+    .select('*').eq('email', email).eq('senha', senha).eq('perfil', 'gestor').maybeSingle();
+
+  btn.disabled = false; btn.textContent = 'Entrar';
+
+  if (error || !data) {
+    erro.textContent = 'E-mail ou senha incorretos, ou usuário sem perfil de gestor.';
+    erro.style.display = 'block';
+    return;
+  }
+
+  usuario = data;
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('dashboard').style.display   = 'flex';
+  document.getElementById('s-nome').textContent = data.nome.split(' ')[0];
+
+  if (data.foto_url && data.foto_url.startsWith('http')) {
+    document.getElementById('s-avatar').innerHTML = `<img src="${esc(data.foto_url)}" alt="Foto">`;
+  }
+
+  mudarAba('veiculos');
+}
+
+function sair() {
+  usuario = null;
+  document.getElementById('dashboard').style.display   = 'none';
+  document.getElementById('login-page').style.display  = 'flex';
+  document.getElementById('l-senha').value = '';
+  closeSidebar();
+}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function mudarAba(novaAba) {
+  aba = novaAba;
+  sel = new Set();
+  closeSidebar();
+
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + aba).classList.add('active');
+
+  const titulos = { veiculos: 'Veículos', motoristas: 'Motoristas', relatorios: 'Relatórios de Rotas' };
+  document.getElementById('t-title').textContent = titulos[aba];
+
+  const isRel = aba === 'relatorios';
+  document.getElementById('btn-novo').style.display = isRel ? 'none' : 'inline-flex';
+  document.getElementById('btn-novo-lbl').textContent = aba === 'veiculos' ? 'Novo Veículo' : 'Novo Motorista';
+  document.getElementById('period-bar').style.display = isRel ? 'block' : 'none';
+
+  document.getElementById('busca').value = '';
+  if (isRel) { document.getElementById('d-ini').value = ''; document.getElementById('d-fim').value = ''; }
+
+  carregarDados();
+}
+
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+async function carregarDados() {
+  document.getElementById('area').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  if (aba === 'veiculos') {
+    const { data } = await sb.from('veiculos').select('*').order('modelo');
+    brutos = data || [];
+  } else if (aba === 'motoristas') {
+    const { data } = await sb.from('usuarios').select('*').eq('perfil', 'motorista').order('nome');
+    brutos = data || [];
+  } else {
+    const { data } = await sb.from('movimentacoes').select('*').order('data_inicio', { ascending: false });
+    brutos = data || [];
+  }
+
+  filtrar();
+}
+
+function filtrar() {
+  const q = document.getElementById('busca').value.toLowerCase().trim();
+
+  if (aba === 'relatorios') {
+    const di = document.getElementById('d-ini').value;
+    const df = document.getElementById('d-fim').value;
+
+    filtrados = brutos.filter(item => {
+      const txt = (item.motorista_nome || '').toLowerCase().includes(q) ||
+                  (item.veiculo_placa  || '').toLowerCase().includes(q) ||
+                  (item.destino        || '').toLowerCase().includes(q);
+
+      const dt = item.data_inicio ? new Date(item.data_inicio) : null;
+      const ok_i = !di || (dt && dt >= new Date(di + 'T00:00:00'));
+      const ok_f = !df || (dt && dt <= new Date(df + 'T23:59:59'));
+
+      return txt && ok_i && ok_f;
+    });
+
+    sel = new Set([...sel].filter(id => filtrados.find(i => i.id === id)));
+    atualizarSel();
+  } else {
+    filtrados = brutos.filter(item => {
+      const a = (item.nome || item.modelo || '').toLowerCase();
+      const b = (item.placa || item.email || '').toLowerCase();
+      return a.includes(q) || b.includes(q);
+    });
+  }
+
+  renderizar();
+}
+
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function renderizar() {
+  const area = document.getElementById('area');
+  if (filtrados.length === 0) {
+    area.innerHTML = '<div class="empty"><p>Nenhum registro encontrado.</p></div>';
+    return;
+  }
+  if (aba === 'veiculos')    renderVeiculos(area);
+  else if (aba === 'motoristas') renderMotoristas(area);
+  else renderRelatorios(area);
+}
+
+function renderVeiculos(area) {
+  area.innerHTML = `
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th>Modelo</th><th>Placa</th><th>KM Atual</th><th>Ações</th>
+        </tr></thead>
+        <tbody>
+          ${filtrados.map((v, i) => `
+            <tr>
+              <td data-label="Modelo">${esc(v.modelo)}</td>
+              <td data-label="Placa"><strong>${esc(v.placa)}</strong></td>
+              <td data-label="KM Atual">${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+              <td data-label="Ações">
+                <div class="actions">
+                  <button class="btn btn-sm btn-ghost" onclick="abrirFotos(${i})" title="Fotos" style="color:var(--success)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </button>
+                  <button class="btn btn-sm btn-ghost" onclick="abrirEdicao(${i})" title="Editar">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--primary)" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="btn btn-sm btn-ghost" onclick="excluir('${v.id}','veiculos')" title="Excluir">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderMotoristas(area) {
+  area.innerHTML = `
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>E-mail</th><th>Ações</th>
+        </tr></thead>
+        <tbody>
+          ${filtrados.map((m, i) => `
+            <tr>
+              <td data-label="Nome">${esc(m.nome)}</td>
+              <td data-label="E-mail">${esc(m.email)}</td>
+              <td data-label="Ações">
+                <div class="actions">
+                  <button class="btn btn-sm btn-ghost" onclick="abrirEdicao(${i})" title="Editar">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--primary)" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="btn btn-sm btn-ghost" onclick="excluir('${m.id}','usuarios')" title="Excluir">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderRelatorios(area) {
+  const todos = filtrados.length > 0 && filtrados.every(i => sel.has(i.id));
+  document.getElementById('chk-all').checked = todos;
+
+  area.innerHTML = `
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th><input type="checkbox" ${todos?'checked':''} onchange="toggleTodos()" style="accent-color:#fff;width:15px;height:15px"></th>
+          <th>Motorista</th><th>Veículo</th><th>Local de Saída</th><th>Data/Hora Saída</th>
+          <th>Local de Chegada</th><th>Data/Hora Chegada</th>
+          <th>KM Ini.</th><th>KM Fin.</th><th>KM Total</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${filtrados.map((r, i) => `
+            <tr style="${sel.has(r.id)?'background:var(--primary-light)':''}">
+              <td data-label="">
+                <input type="checkbox" ${sel.has(r.id)?'checked':''} onchange="toggleItem('${r.id}')" style="width:15px;height:15px;accent-color:var(--primary)">
+              </td>
+              <td data-label="Motorista"><strong>${esc(r.motorista_nome)}</strong></td>
+              <td data-label="Veículo">${esc(r.veiculo_placa)}</td>
+              <td data-label="Local de Saída">${esc(r.destino||'-')}</td>
+              <td data-label="Data/Hora Saída">${fmtDH(r.data_inicio)}</td>
+              <td data-label="Local de Chegada">${esc(r.local_chegada||'-')}</td>
+              <td data-label="Data/Hora Chegada">${r.data_fim ? fmtDH(r.data_fim) : '-'}</td>
+              <td data-label="KM Ini.">${r.km_inicial}</td>
+              <td data-label="KM Fin.">${r.km_final||'-'}</td>
+              <td data-label="KM Total">${r.km_final?(r.km_final-r.km_inicial)+' km':'-'}</td>
+              <td data-label="Status">
+                <span class="badge ${r.data_fim?'badge-green':'badge-yellow'}">${r.data_fim?'Finalizada':'Em curso'}</span>
+              </td>
+              <td data-label="">
+                <button class="btn btn-sm btn-ghost" onclick="verDetalhe(${i})" title="Ver detalhes">
+                  <svg viewBox="0 0 24 24" width="15" height="15" stroke="var(--primary)" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// SELECTION
+// ══════════════════════════════════════
+function toggleItem(id) {
+  sel.has(id) ? sel.delete(id) : sel.add(id);
+  atualizarSel();
+  renderizar();
+}
+
+function toggleTodos() {
+  const todos = filtrados.every(i => sel.has(i.id));
+  if (todos) sel = new Set();
+  else filtrados.forEach(i => sel.add(i.id));
+  atualizarSel();
+  renderizar();
+}
+
+function atualizarSel() {
+  const n = sel.size;
+  document.getElementById('pdf-lbl').textContent  = `Gerar PDF (${n})`;
+  document.getElementById('btn-pdf').disabled      = n === 0;
+  document.getElementById('sel-lbl').textContent   = (n === filtrados.length && filtrados.length > 0) ? 'Desmarcar todos' : 'Selecionar todos';
+  document.getElementById('chk-all').checked       = (n === filtrados.length && filtrados.length > 0);
+}
+
+// ══════════════════════════════════════
+// CRUD
+// ══════════════════════════════════════
+function abrirNovo() {
+  editando = null;
+  document.getElementById('m-crud-title').textContent = aba === 'veiculos' ? 'Novo Veículo' : 'Novo Motorista';
+  document.getElementById('m-crud-body').innerHTML    = buildForm(null);
+  openModal('m-crud');
+}
+
+function abrirEdicao(idx) {
+  editando = filtrados[idx];
+  document.getElementById('m-crud-title').textContent = aba === 'veiculos' ? 'Editar Veículo' : 'Editar Motorista';
+  document.getElementById('m-crud-body').innerHTML    = buildForm(editando);
+  openModal('m-crud');
+}
+
+function buildForm(item) {
+  if (aba === 'veiculos') return `
+    <div class="form-group"><label>Modelo</label><input type="text" id="f-modelo" value="${esc(item?.modelo||'')}" placeholder="Ex: Volkswagen Gol"></div>
+    <div class="form-group"><label>Placa</label><input type="text" id="f-placa" value="${esc(item?.placa||'')}" placeholder="Ex: ABC-1234" ${item?'readonly':''}></div>
+    <div class="form-group"><label>KM Atual</label><input type="number" id="f-km" value="${item?.km_atual||0}" min="0"></div>`;
+  return `
+    <div class="form-group"><label>Nome</label><input type="text" id="f-nome" value="${esc(item?.nome||'')}" placeholder="Nome completo"></div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="f-email" value="${esc(item?.email||'')}" placeholder="email@exemplo.com"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="f-senha" value="${esc(item?.senha||'')}" placeholder="Senha de acesso"></div>`;
+}
+
+async function salvar() {
+  let payload, tabela;
+  try {
+    if (aba === 'veiculos') {
+      tabela = 'veiculos';
+      const modelo = document.getElementById('f-modelo').value.trim();
+      const placa  = document.getElementById('f-placa').value.trim().toUpperCase();
+      const km     = Number(document.getElementById('f-km').value);
+      if (!modelo || !placa) throw new Error('Preencha modelo e placa.');
+      payload = { modelo, placa, km_atual: km };
+    } else {
+      tabela = 'usuarios';
+      const nome  = document.getElementById('f-nome').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      const senha = document.getElementById('f-senha').value;
+      if (!nome || !email || !senha) throw new Error('Preencha todos os campos.');
+      payload = { nome, email, senha, perfil: 'motorista' };
+    }
+
+    const res = editando
+      ? await sb.from(tabela).update(payload).eq('id', editando.id)
+      : await sb.from(tabela).insert([payload]);
+
+    if (res.error) throw res.error;
+    toast('Dados salvos com sucesso!');
+    closeModal('m-crud');
+    carregarDados();
+  } catch (err) {
+    toast(err.message, 'err');
+  }
+}
+
+async function excluir(id, tabela) {
+  if (!confirm('Deseja excluir este registro?')) return;
+  const { error } = await sb.from(tabela).delete().eq('id', id);
+  if (error) { toast(error.message, 'err'); return; }
+  toast('Registro excluído.');
+  carregarDados();
+}
+
+// ══════════════════════════════════════
+// FOTOS
+// ══════════════════════════════════════
+async function abrirFotos(idx) {
+  const v = filtrados[idx];
+  fotoPlaca  = v.placa;
+  fotoModelo = v.modelo;
+  document.getElementById('m-fotos-title').textContent = `Fotos — ${v.modelo} (${v.placa})`;
+  document.getElementById('m-fotos-body').innerHTML    = '<div class="loading"><div class="spinner"></div></div>';
+  openModal('m-fotos');
+
+  const { data: movs } = await sb.from('movimentacoes').select('id').eq('veiculo_placa', v.placa);
+  if (!movs?.length) { document.getElementById('m-fotos-body').innerHTML = '<div class="empty"><p>Nenhuma foto registrada.</p></div>'; return; }
+
+  const ids = movs.map(m => m.id);
+  const { data: fotos } = await sb.from('evidencias_movimentacao').select('*').in('movimentacao_id', ids).order('created_at', { ascending: false });
+
+  if (!fotos?.length) { document.getElementById('m-fotos-body').innerHTML = '<div class="empty"><p>Nenhuma foto registrada.</p></div>'; return; }
+
+  const setores = ['Frente', 'Traseira', 'Lado Direito', 'Lado Esquerdo'];
+  let html = '';
+  setores.forEach(s => {
+    const fs = fotos.filter(f => f.setor === s);
+    if (!fs.length) return;
+    html += `<p class="setor-label">${s} (${fs.length})</p><div class="photos-grid">`;
+    fs.forEach(f => {
+      const isWeb = f.foto_url?.startsWith('http');
+      html += `<div class="photo-wrap">
+        ${isWeb
+          ? `<img src="${esc(f.foto_url)}" onclick="openFull('${esc(f.foto_url)}')" onerror="this.outerHTML='<div class=photo-no-web>📷 Indisponível</div>'">`
+          : `<div class="photo-no-web">📱<span>App móvel</span></div>`}
+        <button class="photo-del" onclick="excluirFoto('${f.id}')" title="Excluir">✕</button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('m-fotos-body').innerHTML = html;
+}
+
+async function excluirFoto(id) {
+  if (!confirm('Excluir esta foto permanentemente?')) return;
+  const { error } = await sb.from('evidencias_movimentacao').delete().eq('id', id);
+  if (error) { toast(error.message, 'err'); return; }
+  toast('Foto excluída.');
+  await abrirFotos(filtrados.findIndex(v => v.placa === fotoPlaca));
+}
+
+// ══════════════════════════════════════
+// DETALHE RELATÓRIO
+// ══════════════════════════════════════
+function verDetalhe(idx) {
+  detalhe = filtrados[idx];
+  const r = detalhe;
+  const km = r.km_final ? (r.km_final - r.km_inicial) : 0;
+
+  document.getElementById('m-det-body').innerHTML = `
+    <div class="d-row"><span class="d-label">Motorista</span><span class="d-value">${esc(r.motorista_nome)}</span></div>
+    <div class="d-row"><span class="d-label">Veículo</span><span class="d-value">${esc(r.veiculo_placa)}</span></div>
+    <div class="d-row"><span class="d-label">Local de Saída</span><span class="d-value">${esc(r.destino||'-')}</span></div>
+    <div class="d-row"><span class="d-label">Data/Hora Saída</span><span class="d-value">${fmtDH(r.data_inicio)}</span></div>
+    <div class="d-row"><span class="d-label">Local de Chegada</span><span class="d-value">${esc(r.local_chegada||'Em curso...')}</span></div>
+    <div class="d-row"><span class="d-label">Data/Hora Chegada</span><span class="d-value">${r.data_fim ? fmtDH(r.data_fim) : 'Aguardando'}</span></div>
+    <div class="km-box">
+      <div class="lbl">KM TOTAL PERCORRIDO</div>
+      <div class="val">${km} km</div>
+    </div>
+    <div class="d-row"><span class="d-label">KM Inicial</span><span class="d-value">${r.km_inicial} km</span></div>
+    <div class="d-row"><span class="d-label">KM Final</span><span class="d-value">${r.km_final ? r.km_final + ' km' : 'Pendente'}</span></div>`;
+
+  openModal('m-det');
+}
+
+// ══════════════════════════════════════
+// PDF
+// ══════════════════════════════════════
+function gerarPDF() {
+  const itens = filtrados.filter(i => sel.has(i.id));
+  if (!itens.length) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l', 'mm', 'a4');
+  const pw  = doc.internal.pageSize.getWidth();
+
+  const di  = document.getElementById('d-ini').value;
+  const df  = document.getElementById('d-fim').value;
+  const per = (di||df) ? `${di ? fmtD(di+' ') : 'início'} até ${df ? fmtD(df+' ') : 'atual'}` : 'Todos os registros';
+
+  doc.setFontSize(17); doc.setTextColor(0,51,102);
+  doc.text('Relatório de Rotas — Telealpha', pw/2, 16, { align:'center' });
+  doc.setFontSize(9); doc.setTextColor(100);
+  doc.text(`Período: ${per}  |  Total: ${itens.length} viagem(ns)  |  Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, pw/2, 23, { align:'center' });
+
+  doc.autoTable({
+    startY: 28,
+    head: [['Motorista','Veículo','Local de Saída','Data/Hora Saída','Local de Chegada','Data/Hora Chegada','KM Ini.','KM Fin.','KM Total']],
+    body: itens.map(r => [
+      r.motorista_nome,
+      r.veiculo_placa,
+      r.destino || '-',
+      fmtDH(r.data_inicio),
+      r.local_chegada || '-',
+      r.data_fim ? fmtDH(r.data_fim) : '-',
+      r.km_inicial,
+      r.km_final || '-',
+      r.km_final ? (r.km_final - r.km_inicial) + ' km' : '-'
+    ]),
+    headStyles: { fillColor:[0,51,102], fontSize:8, fontStyle:'bold' },
+    bodyStyles: { fontSize:8 },
+    alternateRowStyles: { fillColor:[245,245,245] },
+    columnStyles: {
+      0:{cellWidth:30}, 1:{cellWidth:20}, 2:{cellWidth:28},
+      3:{cellWidth:30}, 4:{cellWidth:28}, 5:{cellWidth:30},
+      6:{cellWidth:14}, 7:{cellWidth:14}, 8:{cellWidth:18}
+    }
+  });
+
+  const n1 = (di||'inicio').replace(/-/g,'');
+  const n2 = (df||'atual').replace(/-/g,'');
+  doc.save(`Relatorio_${n1}_a_${n2}.pdf`);
+  toast('PDF gerado com sucesso!');
+}
+
+function pdfIndividual() {
+  if (!detalhe) return;
+  const r = detalhe;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pw  = doc.internal.pageSize.getWidth();
+
+  const dataStr = new Date(r.data_inicio).toLocaleDateString('pt-BR').replace(/\//g,'-');
+  const motStr  = r.motorista_nome.replace(/\s+/g,'_');
+
+  doc.setFontSize(20); doc.setTextColor(0,51,102);
+  doc.text('Relatório de Rota', pw/2, 20, { align:'center' });
+  doc.setFontSize(10); doc.setTextColor(100);
+  doc.text(`Telealpha — ${dataStr}`, pw/2, 28, { align:'center' });
+
+  doc.autoTable({
+    startY: 34,
+    body: [
+      ['Motorista',         r.motorista_nome],
+      ['Veículo',           r.veiculo_placa],
+      ['Local de Saída',    r.destino || '-'],
+      ['Data/Hora Saída',   fmtDH(r.data_inicio)],
+      ['Local de Chegada',  r.local_chegada || 'Em curso'],
+      ['Data/Hora Chegada', r.data_fim ? fmtDH(r.data_fim) : 'Aguardando'],
+      ['KM Inicial',        r.km_inicial + ' km'],
+      ['KM Final',          r.km_final ? r.km_final + ' km' : 'Pendente'],
+      ['KM Total Percorrido', r.km_final ? (r.km_final - r.km_inicial) + ' km' : '-'],
+    ],
+    columnStyles: {
+      0: { cellWidth:55, fontStyle:'bold', fillColor:[240,242,245] },
+      1: { cellWidth:'auto' }
+    },
+    bodyStyles: { fontSize:11 },
+    theme: 'grid',
+  });
+
+  doc.save(`Relatorio_${motStr}_${dataStr}.pdf`);
+  toast('PDF gerado!');
+}
+
+// ══════════════════════════════════════
+// MODAIS
+// ══════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('.backdrop').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+</script>
+
+</body>
+</html>
