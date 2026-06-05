@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native';
 
+import { INPUT } from '../../constants/theme';
 import { supabase } from '../../services/supabase';
 import { KEYBOARD_BEHAVIOR, styles } from './LoginStyles';
 
@@ -78,7 +79,7 @@ export default function LoginScreen({ navigation }) {
 
           <TextInput
             placeholder="E-mail"
-            placeholderTextColor="#9AA5B4"
+            placeholderTextColor={INPUT.placeholder}
             style={styles.input}
             value={email}
             onChangeText={setEmail}
@@ -90,7 +91,7 @@ export default function LoginScreen({ navigation }) {
             <TextInput
               style={styles.inputSenha}
               placeholder="Senha"
-              placeholderTextColor="#9AA5B4"
+              placeholderTextColor={INPUT.placeholder}
               secureTextEntry={!verSenha}
               value={senha}
               onChangeText={setSenha}

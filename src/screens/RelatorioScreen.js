@@ -12,8 +12,9 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { INPUT } from '../constants/theme';
 import { supabase } from '../services/supabase';
-import { globalStyles as styles } from '../styles/globalStyles';
+import { styles } from './RelatorioStyles';
 
 export default function RelatorioScreen() {
   const [viagensOriginal, setViagensOriginal] = useState([]); // Base de dados completa
@@ -146,7 +147,7 @@ export default function RelatorioScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput 
             style={{ flex: 1, height: 45, marginLeft: 10 }}
-            placeholder="Filtrar por motorista, placa ou carro..." placeholderTextColor="#9AA5B4"
+            placeholder="Filtrar por motorista, placa ou carro..." placeholderTextColor={INPUT.placeholder}
             value={filtroTexto}
             onChangeText={aplicarFiltro}
           />

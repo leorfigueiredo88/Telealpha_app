@@ -1,13 +1,26 @@
 export const COLORS = {
-  primary: '#003366',    // Azul Marinho (Gestão)
-  secondary: '#F8F9FA',  // Cinza claro (Fundo)
-  accent: '#E63946',     // Vermelho (PDF/Excluir)
-  success: '#2A9D8F',    // Verde (Salvar)
-  text: '#2B2D42',       // Texto Principal
-  textSecondary: '#8D99AE',
+  primary: '#003366',    // Azul Marinho
+  secondary: '#F8F9FA',  // Cinza claro (fundo de cards)
+  accent: '#E63946',     // Vermelho (excluir/sair)
+  success: '#2A9D8F',    // Verde (salvar/confirmar)
+  text: '#1A1A2E',       // Texto principal
+  textSecondary: '#6B7280',
   white: '#FFFFFF',
-  border: '#EDF2F4',
-  placeholder: '#ABB5BE',
+  bg: '#F0F2F5',         // Fundo geral das telas
+  border: '#D0D5DD',
+  placeholder: '#9AA5B4',
+};
+
+// Padrão único para todos os inputs do app
+export const INPUT = {
+  backgroundColor: '#FFFFFF',
+  borderWidth: 1.5,
+  borderColor: '#D0D5DD',
+  borderRadius: 12,
+  padding: 15,
+  fontSize: 16,
+  color: '#1A1A2E',
+  placeholder: '#9AA5B4', // usar em placeholderTextColor nos JSX
 };
 
 export const SIZES = {

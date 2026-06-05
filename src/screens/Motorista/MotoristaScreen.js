@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { COLORS } from '../../constants/theme';
+import { COLORS, INPUT } from '../../constants/theme';
 import { supabase } from '../../services/supabase';
 import { styles } from './MotoristaStyles';
 
@@ -224,9 +224,9 @@ export default function MotoristaScreen({ navigation, route }) {
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.formViagem}>
               <Text style={styles.labelInput}>KM Inicial</Text>
-              <TextInput style={styles.inputViagem} value={kmInicial} editable={false} placeholderTextColor="#9AA5B4" />
+              <TextInput style={styles.inputViagem} value={kmInicial} editable={false} placeholderTextColor={INPUT.placeholder} />
               <Text style={styles.labelInput}>Local de Saída</Text>
-              <TextInput style={styles.inputViagem} value={destino} onChangeText={setDestino} placeholder="Ex: Matriz, Av. Paulista, Depósito..." placeholderTextColor="#9AA5B4" />
+              <TextInput style={styles.inputViagem} value={destino} onChangeText={setDestino} placeholder="Ex: Matriz, Av. Paulista, Depósito..." placeholderTextColor={INPUT.placeholder} />
             </View>
 
             {Object.keys(fotosChecklist).map((setor) => {
@@ -305,9 +305,9 @@ export default function MotoristaScreen({ navigation, route }) {
 
       {/* OUTROS MODAIS */}
       <Modal visible={modalFotoPerfilVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Sua Foto</Text><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={trocarFotoPerfil}><Text style={styles.btnTexto}>GALERIA</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalFotoPerfilVisivel(false)}><Text style={styles.btnFecharTexto}>Fechar</Text></TouchableOpacity></View></View></Modal>
-      <Modal visible={modalSenhaVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Alterar Senha</Text><TextInput style={styles.inputViagemCustom} placeholder="Senha atual" placeholderTextColor="#9AA5B4" secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} /><TextInput style={styles.inputViagemCustom} placeholder="Nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={novaSenha} onChangeText={setNovaSenha} /><TextInput style={styles.inputViagemCustom} placeholder="Confirme a nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={handleAlterarSenha}><Text style={styles.btnTexto}>SALVAR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalSenhaVisivel(false)}><Text style={styles.btnFecharTexto}>Cancelar</Text></TouchableOpacity></View></View></Modal>
+      <Modal visible={modalSenhaVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Alterar Senha</Text><TextInput style={styles.inputViagemCustom} placeholder="Senha atual" placeholderTextColor={INPUT.placeholder} secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} /><TextInput style={styles.inputViagemCustom} placeholder="Nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={novaSenha} onChangeText={setNovaSenha} /><TextInput style={styles.inputViagemCustom} placeholder="Confirme a nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={handleAlterarSenha}><Text style={styles.btnTexto}>SALVAR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalSenhaVisivel(false)}><Text style={styles.btnFecharTexto}>Cancelar</Text></TouchableOpacity></View></View></Modal>
       <Modal visible={!!fotoTelaCheia} transparent><View style={styles.fullImageContainer}><TouchableOpacity style={styles.btnCloseFull} onPress={() => setFotoTelaCheia(null)}><Ionicons name="close-circle" size={40} color="white" /></TouchableOpacity><Image source={{ uri: fotoTelaCheia }} style={styles.fullImage} resizeMode="contain" /></View></Modal>
-      <Modal visible={modalFinalizarVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Finalizar Viagem</Text><TextInput style={styles.inputViagemCustom} placeholder="KM Final" placeholderTextColor="#9AA5B4" keyboardType="numeric" value={kmFinalInformado} onChangeText={setKmFinalInformado} /><TextInput style={styles.inputViagemCustom} placeholder="Local de chegada" placeholderTextColor="#9AA5B4" value={localChegada} onChangeText={setLocalChegada} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={finalizarViagemDB}><Text style={styles.btnTexto}>CONCLUIR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalFinalizarVisivel(false)}><Text style={styles.btnFecharTexto}>Voltar</Text></TouchableOpacity></View></View></Modal>
+      <Modal visible={modalFinalizarVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Finalizar Viagem</Text><TextInput style={styles.inputViagemCustom} placeholder="KM Final" placeholderTextColor={INPUT.placeholder} keyboardType="numeric" value={kmFinalInformado} onChangeText={setKmFinalInformado} /><TextInput style={styles.inputViagemCustom} placeholder="Local de chegada" placeholderTextColor={INPUT.placeholder} value={localChegada} onChangeText={setLocalChegada} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={finalizarViagemDB}><Text style={styles.btnTexto}>CONCLUIR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalFinalizarVisivel(false)}><Text style={styles.btnFecharTexto}>Voltar</Text></TouchableOpacity></View></View></Modal>
     </View>
   );
 }

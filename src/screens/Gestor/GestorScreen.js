@@ -7,20 +7,18 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   FlatList,
   Image,
   Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+import { INPUT } from '../../constants/theme';
 import { supabase } from '../../services/supabase';
-
-const { width } = Dimensions.get('window');
+import { s } from './GestorStyles';
 
 export default function GestorScreen({ navigation, route }) {
   const usuarioLogado = route.params?.usuario;
@@ -405,7 +403,7 @@ export default function GestorScreen({ navigation, route }) {
 
       <View style={s.buscaContainer}>
         <Ionicons name="search" size={18} color="#999" />
-        <TextInput placeholder="Pesquisar..." placeholderTextColor="#9AA5B4" style={{ flex: 1, marginLeft: 10, color: '#1A1A2E' }} value={busca} onChangeText={setBusca} />
+        <TextInput placeholder="Pesquisar..." placeholderTextColor={INPUT.placeholder} style={{ flex: 1, marginLeft: 10, color: '#1A1A2E' }} value={busca} onChangeText={setBusca} />
       </View>
 
       {abaAtiva === 'relatorios' && (
@@ -416,7 +414,7 @@ export default function GestorScreen({ navigation, route }) {
               <Ionicons name="calendar-outline" size={15} color="#999" />
               <TextInput
                 placeholder="De: DD/MM/AAAA"
-                placeholderTextColor="#9AA5B4"
+                placeholderTextColor={INPUT.placeholder}
                 style={{ flex: 1, marginLeft: 6, fontSize: 13, color: '#1A1A2E' }}
                 value={dataInicio}
                 onChangeText={t => setDataInicio(mascaraData(t))}
@@ -428,7 +426,7 @@ export default function GestorScreen({ navigation, route }) {
               <Ionicons name="calendar-outline" size={15} color="#999" />
               <TextInput
                 placeholder="Até: DD/MM/AAAA"
-                placeholderTextColor="#9AA5B4"
+                placeholderTextColor={INPUT.placeholder}
                 style={{ flex: 1, marginLeft: 6, fontSize: 13, color: '#1A1A2E' }}
                 value={dataFim}
                 onChangeText={t => setDataFim(mascaraData(t))}
@@ -537,20 +535,20 @@ export default function GestorScreen({ navigation, route }) {
             <Text style={s.modalTitulo}>{itemSendoEditado ? 'Editar' : 'Novo'} {abaAtiva === 'veiculos' ? 'Veículo' : 'Motorista'}</Text>
             {abaAtiva === 'veiculos' ? (
               <>
-                <TextInput placeholder="Modelo" placeholderTextColor="#9AA5B4" style={s.input} value={modelo} onChangeText={setModelo} />
-                <TextInput placeholder="Placa" placeholderTextColor="#9AA5B4" style={s.input} value={placa} onChangeText={setPlaca} />
-                <TextInput placeholder="KM Inicial" placeholderTextColor="#9AA5B4" style={s.input} value={kmAtual} onChangeText={setKmAtual} keyboardType="numeric" />
+                <TextInput placeholder="Modelo" placeholderTextColor={INPUT.placeholder} style={s.input} value={modelo} onChangeText={setModelo} />
+                <TextInput placeholder="Placa" placeholderTextColor={INPUT.placeholder} style={s.input} value={placa} onChangeText={setPlaca} />
+                <TextInput placeholder="KM Inicial" placeholderTextColor={INPUT.placeholder} style={s.input} value={kmAtual} onChangeText={setKmAtual} keyboardType="numeric" />
               </>
             ) : (
               <>
-                <TextInput placeholder="Nome" placeholderTextColor="#9AA5B4" style={s.input} value={nome} onChangeText={setNome} />
-                <TextInput placeholder="E-mail" placeholderTextColor="#9AA5B4" style={s.input} value={email} onChangeText={setEmail} />
+                <TextInput placeholder="Nome" placeholderTextColor={INPUT.placeholder} style={s.input} value={nome} onChangeText={setNome} />
+                <TextInput placeholder="E-mail" placeholderTextColor={INPUT.placeholder} style={s.input} value={email} onChangeText={setEmail} />
                 
                 {/* CAMPO DE SENHA COM OLHINHO */}
                 <View style={s.inputSenhaContainer}>
                   <TextInput
                     placeholder="Senha"
-                    placeholderTextColor="#9AA5B4"
+                    placeholderTextColor={INPUT.placeholder}
                     style={{ flex: 1, height: '100%', paddingHorizontal: 15, color: '#1A1A2E' }}
                     value={senha}
                     onChangeText={setSenha}
@@ -743,9 +741,9 @@ export default function GestorScreen({ navigation, route }) {
         <View style={s.modalOverlayCentro}>
           <View style={s.modalCardPerfil}>
             <Text style={s.modalTitulo}>Alterar Senha</Text>
-            <TextInput style={s.input} placeholder="Senha atual" placeholderTextColor="#9AA5B4" secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} />
-            <TextInput style={s.input} placeholder="Nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={novaSenha} onChangeText={setNovaSenha} />
-            <TextInput style={s.input} placeholder="Confirmar nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} />
+            <TextInput style={s.input} placeholder="Senha atual" placeholderTextColor={INPUT.placeholder} secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} />
+            <TextInput style={s.input} placeholder="Nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={novaSenha} onChangeText={setNovaSenha} />
+            <TextInput style={s.input} placeholder="Confirmar nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} />
             <TouchableOpacity style={s.btnSalvar} onPress={handleAlterarSenha}>
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>SALVAR NOVA SENHA</Text>
             </TouchableOpacity>
@@ -759,56 +757,3 @@ export default function GestorScreen({ navigation, route }) {
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F0F2F5', padding: 20 },
-  menuGrid: { marginBottom: 20 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  cardMenu: { width: '48%', backgroundColor: '#fff', borderRadius: 15, padding: 15, height: 90, justifyContent: 'center', alignItems: 'center', elevation: 2 },
-  cardRelatorio: { width: '100%', backgroundColor: '#fff', borderRadius: 15, padding: 15, height: 70, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  cardAtivo: { backgroundColor: '#003366' },
-  cardTitulo: { fontSize: 14, fontWeight: 'bold', color: '#003366' },
-  buscaContainer: { flexDirection: 'row', backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#D0D5DD', padding: 12, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
-  itemLista: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 5, borderLeftColor: '#003366' },
-  itemNome: { fontWeight: 'bold', color: '#1A1A2E', fontSize: 16 },
-  itemDetalhe: { color: '#666', fontSize: 12 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalForm: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 10 },
-  modalConteudo: { backgroundColor: '#fff', borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 25, height: '80%', marginTop: 'auto' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitulo: { fontSize: 20, fontWeight: 'bold', color: '#003366', marginBottom: 15 },
-  input: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 10, borderWidth: 1.5, borderColor: '#D0D5DD', color: '#1A1A2E' },
-  inputSenhaContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, height: 52, marginBottom: 10, borderWidth: 1.5, borderColor: '#D0D5DD' },
-  btnSalvar: { backgroundColor: '#003366', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 10 },
-  btnFlutuante: { position: 'absolute', bottom: 30, right: 30, backgroundColor: '#003366', width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center', elevation: 10 },
-  barraSelecao: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingHorizontal: 4 },
-  btnSelecionarTodos: { flexDirection: 'row', alignItems: 'center' },
-  txtSelecionarTodos: { fontSize: 13, color: '#003366', marginLeft: 6 },
-  btnGerarPDF: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#003366', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
-  txtGerarPDF: { color: '#fff', fontWeight: 'bold', fontSize: 13, marginLeft: 6 },
-  itemSelecionado: { backgroundColor: '#EBF4FF', borderLeftColor: '#2A9D8F' },
-  label: { fontSize: 10, color: '#999', fontWeight: 'bold', marginTop: 15, marginBottom: 2 },
-  valor: { fontSize: 16, color: '#333', fontWeight: 'bold' },
-  kmDestaque: { backgroundColor: '#003366', padding: 15, borderRadius: 12, marginTop: 20, alignItems: 'center' },
-  btnPdfModal: { backgroundColor: '#d32f2f', flexDirection: 'row', padding: 15, borderRadius: 12, marginTop: 30, justifyContent: 'center', alignItems: 'center' },
-
-  // Estilos do menu lateral
-  menuOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  menuLateral: { width: width * 0.78, height: '100%', backgroundColor: '#fff', padding: 25, borderTopRightRadius: 30, borderBottomRightRadius: 30 },
-  menuHeader: { alignItems: 'center', marginBottom: 30, borderBottomWidth: 1, borderBottomColor: '#EEE', paddingBottom: 20, marginTop: 40 },
-  containerAvatar: { width: 100, height: 100, borderRadius: 50, overflow: 'hidden', backgroundColor: '#F0F0F0', marginBottom: 10, borderWidth: 3, borderColor: '#003366', justifyContent: 'center', alignItems: 'center' },
-  fotoPerfil: { width: '100%', height: '100%' },
-  menuNome: { fontSize: 18, fontWeight: 'bold', color: '#003366', marginBottom: 4 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#F9F9F9' },
-  menuItemTexto: { fontSize: 16, marginLeft: 15, color: '#444' },
-  menuItemSair: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, marginTop: 'auto' },
-  menuItemTextoSair: { fontSize: 16, marginLeft: 15, color: '#E63946', fontWeight: 'bold' },
-  modalOverlayCentro: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalCardPerfil: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 10 },
-  fullImageContainer: { flex: 1, backgroundColor: 'black', justifyContent: 'center' },
-  fullImage: { width: width, height: width },
-  btnCloseFull: { position: 'absolute', top: 50, right: 20, zIndex: 10 },
-  wrapperFotoGaleria: { margin: 5, position: 'relative' },
-  fotoGaleriaGestor: { width: 95, height: 95, borderRadius: 10, backgroundColor: '#F0F0F0' },
-  btnExcluirFoto: { position: 'absolute', top: -8, right: -8, backgroundColor: 'white', borderRadius: 11 },
-});

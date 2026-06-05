@@ -14,8 +14,9 @@ import {
     TouchableWithoutFeedback,
     View
 } from 'react-native';
+import { INPUT } from '../constants/theme';
 import { supabase } from '../services/supabase';
-import { globalStyles as styles } from '../styles/globalStyles';
+import { styles } from './PerfilStyles';
 
 const AVATAR_PADRAO = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
@@ -186,7 +187,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={senhaAtual} 
                 onChangeText={setSenhaAtual} 
-                placeholder="Digite a senha atual" placeholderTextColor="#9AA5B4"
+                placeholder="Digite a senha atual" placeholderTextColor={INPUT.placeholder}
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               
@@ -196,7 +197,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={novaSenha} 
                 onChangeText={setNovaSenha} 
-                placeholder="Mínimo 6 caracteres" placeholderTextColor="#9AA5B4"
+                placeholder="Mínimo 6 caracteres" placeholderTextColor={INPUT.placeholder}
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               
@@ -206,7 +207,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={confirmarSenha} 
                 onChangeText={setConfirmarSenha} 
-                placeholder="Repita a nova senha" placeholderTextColor="#9AA5B4"
+                placeholder="Repita a nova senha" placeholderTextColor={INPUT.placeholder}
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               
