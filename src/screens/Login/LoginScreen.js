@@ -11,14 +11,17 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  useColorScheme,
   View
 } from 'react-native';
 
-// --- IMPORTS DO PROJETO ---
 import { supabase } from '../../services/supabase';
-import { KEYBOARD_BEHAVIOR, styles } from './LoginStyles';
+import { KEYBOARD_BEHAVIOR, TEMA, layout } from './LoginStyles';
 
 export default function LoginScreen({ navigation }) {
+  const scheme = useColorScheme();
+  const t = TEMA[scheme === 'dark' ? 'dark' : 'light'];
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [verSenha, setVerSenha] = useState(false);
@@ -45,7 +48,6 @@ export default function LoginScreen({ navigation }) {
         return;
       }
 
-      // Lógica de navegação original preservada
       if (data.perfil === 'gestor') {
         navigation.replace('Gestor', { usuario: data });
       } else {
@@ -60,63 +62,83 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={[layout.container, { backgroundColor: t.bg }]}
       behavior={KEYBOARD_BEHAVIOR}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer} 
+        <ScrollView
+          contentContainerStyle={layout.scrollContainer}
           bounces={false}
           showsVerticalScrollIndicator={false}
         >
-          
-          <Image 
-            source={require('../../../assets/images/logo.png')} 
-            style={styles.logo} 
-            resizeMode="contain" 
+          <Image
+            source={require('../../../assets/images/logo.png')}
+            style={layout.logo}
+            resizeMode="contain"
+            // tintColor aplica cor à imagem PNG com canal alpha:
+            // no dark mode deixa a logo visível em branco,
+            // no light mode usa a cor original (undefined = sem filtro)
+            tintColor={scheme === 'dark' ? '#FFFFFF' : undefined}
           />
-          
-          <Text style={styles.subtitulo}>Faça login para continuar</Text>
 
-          <TextInput 
-            placeholder="E-mail" 
-            style={styles.input} 
-            value={email} 
-            onChangeText={setEmail} 
+          <Text style={[layout.subtitulo, { color: t.subtitulo }]}>
+            Faça login para continuar
+          </Text>
+
+          <TextInput
+            placeholder="E-mail"
+            placeholderTextColor={t.placeholder}
+            style={[layout.input, {
+              backgroundColor: t.inputBg,
+              borderColor: t.inputBorda,
+              color: t.inputTexto,
+            }]}
+            value={email}
+            onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+            keyboardAppearance={scheme === 'dark' ? 'dark' : 'light'}
           />
 
-          <View style={styles.inputSenhaContainer}>
-            <TextInput 
-              style={styles.inputSenha}
+          <View style={[layout.inputSenhaContainer, {
+            backgroundColor: t.inputBg,
+            borderColor: t.inputBorda,
+          }]}>
+            <TextInput
+              style={[layout.inputSenha, { color: t.inputTexto }]}
               placeholder="Senha"
+              placeholderTextColor={t.placeholder}
               secureTextEntry={!verSenha}
               value={senha}
               onChangeText={setSenha}
+              keyboardAppearance={scheme === 'dark' ? 'dark' : 'light'}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPressIn={() => setVerSenha(true)}
               onPressOut={() => setVerSenha(false)}
               activeOpacity={0.7}
-              style={styles.eyeIcon}
+              style={layout.eyeIcon}
             >
-              <Ionicons name={verSenha ? "eye" : "eye-off"} size={22} color="#666" />
+              <Ionicons
+                name={verSenha ? "eye" : "eye-off"}
+                size={22}
+                color={t.icone}
+              />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
-            style={styles.btnEntrar} 
+          <TouchableOpacity
+            style={layout.btnEntrar}
             onPress={handleLogin}
             disabled={carregando}
           >
-            {carregando ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Text style={styles.btnTexto}>ENTRAR</Text>
-            )}
+            {carregando
+              ? <ActivityIndicator color="#FFF" />
+              : <Text style={layout.btnTexto}>ENTRAR</Text>
+            }
           </TouchableOpacity>
+
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

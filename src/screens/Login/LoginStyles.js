@@ -1,48 +1,70 @@
 import { Platform, StyleSheet } from 'react-native';
 import { COLORS } from '../../constants/theme';
 
-// Comportamento do teclado isolado no arquivo de estilos
 export const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 
-export const styles = StyleSheet.create({
+// Paleta de cores por modo
+export const TEMA = {
+  light: {
+    bg: '#F0F2F5',
+    card: '#FFFFFF',
+    texto: '#1A1A2E',
+    subtitulo: '#666666',
+    inputBg: '#FFFFFF',
+    inputBorda: '#DDDDDD',
+    inputTexto: '#1A1A2E',
+    placeholder: '#999999',
+    icone: '#666666',
+    logoBg: 'transparent',
+  },
+  dark: {
+    bg: '#0D1117',
+    card: '#161B22',
+    texto: '#F0F2F5',
+    subtitulo: '#8B949E',
+    inputBg: '#21262D',
+    inputBorda: '#30363D',
+    inputTexto: '#F0F2F5',
+    placeholder: '#6E7681',
+    icone: '#8B949E',
+    logoBg: 'transparent',
+  },
+};
+
+// Estilos estáticos (layout, sem cor)
+export const layout = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F2F5',
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 25,
+    padding: 28,
   },
   logo: {
-    width: '100%',
-    height: 150,
-    marginBottom: 10,
+    width: '80%',
+    height: 140,
+    marginBottom: 8,
     alignSelf: 'center',
   },
   subtitulo: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 32,
   },
   input: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 10,
+    borderWidth: 1.5,
+    borderRadius: 12,
     padding: 15,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 14,
   },
   inputSenhaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 10,
-    marginBottom: 20,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    marginBottom: 22,
   },
   inputSenha: {
     flex: 1,
@@ -53,19 +75,20 @@ export const styles = StyleSheet.create({
     padding: 15,
   },
   btnEntrar: {
-    backgroundColor: COLORS.primary || '#007AFF',
+    backgroundColor: COLORS.primary,
     padding: 18,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
   btnTexto: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });
