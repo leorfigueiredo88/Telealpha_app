@@ -186,7 +186,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={senhaAtual} 
                 onChangeText={setSenhaAtual} 
-                placeholder="Digite a senha atual"
+                placeholder="Digite a senha atual" placeholderTextColor="#9AA5B4"
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               
@@ -196,7 +196,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={novaSenha} 
                 onChangeText={setNovaSenha} 
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres" placeholderTextColor="#9AA5B4"
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               
@@ -206,7 +206,7 @@ export default function PerfilScreen({ route }) {
                 secureTextEntry 
                 value={confirmarSenha} 
                 onChangeText={setConfirmarSenha} 
-                placeholder="Repita a nova senha"
+                placeholder="Repita a nova senha" placeholderTextColor="#9AA5B4"
                 onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
               />
               

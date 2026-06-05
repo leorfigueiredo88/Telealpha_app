@@ -4,7 +4,7 @@ export const globalStyles = StyleSheet.create({
   // LOGIN
   containerLogin: { flex: 1, justifyContent: 'center', padding: 30, backgroundColor: '#003366' },
   logo: { fontSize: 40, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 40 },
-  input: { backgroundColor: '#fff', padding: 15, borderRadius: 8, marginBottom: 15, color: '#333' },
+  input: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 15, color: '#1A1A2E', borderWidth: 1.5, borderColor: '#D0D5DD' },
   botaoEntrar: { backgroundColor: '#28a745', padding: 15, borderRadius: 8, alignItems: 'center' },
   textoBotao: { color: '#fff', fontWeight: 'bold' },
 
@@ -20,7 +20,7 @@ export const globalStyles = StyleSheet.create({
   btnMenuTexto: { color: '#003366', fontWeight: 'bold' },
   sessaoSenha: { marginTop: 10, backgroundColor: '#fff', padding: 20, borderRadius: 15, borderLeftWidth: 5, borderLeftColor: '#28a745' },
   label: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 5 },
-  inputSenha: { backgroundColor: '#F5F7FA', padding: 12, borderRadius: 8, marginBottom: 15, borderWidth: 1, borderColor: '#ddd' },
+  inputSenha: { backgroundColor: '#fff', padding: 14, borderRadius: 12, marginBottom: 15, borderWidth: 1.5, borderColor: '#D0D5DD', color: '#1A1A2E' },
   btnConfirmar: { backgroundColor: '#28a745', padding: 15, borderRadius: 10, alignItems: 'center' },
 
   // FOTO DINÂMICA

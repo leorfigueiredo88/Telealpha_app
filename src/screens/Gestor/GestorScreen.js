@@ -405,7 +405,7 @@ export default function GestorScreen({ navigation, route }) {
 
       <View style={s.buscaContainer}>
         <Ionicons name="search" size={18} color="#999" />
-        <TextInput placeholder="Pesquisar..." style={{ flex: 1, marginLeft: 10 }} value={busca} onChangeText={setBusca} />
+        <TextInput placeholder="Pesquisar..." placeholderTextColor="#9AA5B4" style={{ flex: 1, marginLeft: 10, color: '#1A1A2E' }} value={busca} onChangeText={setBusca} />
       </View>
 
       {abaAtiva === 'relatorios' && (
@@ -416,7 +416,8 @@ export default function GestorScreen({ navigation, route }) {
               <Ionicons name="calendar-outline" size={15} color="#999" />
               <TextInput
                 placeholder="De: DD/MM/AAAA"
-                style={{ flex: 1, marginLeft: 6, fontSize: 13 }}
+                placeholderTextColor="#9AA5B4"
+                style={{ flex: 1, marginLeft: 6, fontSize: 13, color: '#1A1A2E' }}
                 value={dataInicio}
                 onChangeText={t => setDataInicio(mascaraData(t))}
                 maxLength={10}
@@ -427,7 +428,8 @@ export default function GestorScreen({ navigation, route }) {
               <Ionicons name="calendar-outline" size={15} color="#999" />
               <TextInput
                 placeholder="Até: DD/MM/AAAA"
-                style={{ flex: 1, marginLeft: 6, fontSize: 13 }}
+                placeholderTextColor="#9AA5B4"
+                style={{ flex: 1, marginLeft: 6, fontSize: 13, color: '#1A1A2E' }}
                 value={dataFim}
                 onChangeText={t => setDataFim(mascaraData(t))}
                 maxLength={10}
@@ -535,23 +537,24 @@ export default function GestorScreen({ navigation, route }) {
             <Text style={s.modalTitulo}>{itemSendoEditado ? 'Editar' : 'Novo'} {abaAtiva === 'veiculos' ? 'Veículo' : 'Motorista'}</Text>
             {abaAtiva === 'veiculos' ? (
               <>
-                <TextInput placeholder="Modelo" style={s.input} value={modelo} onChangeText={setModelo} />
-                <TextInput placeholder="Placa" style={s.input} value={placa} onChangeText={setPlaca} />
-                <TextInput placeholder="KM Inicial" style={s.input} value={kmAtual} onChangeText={setKmAtual} keyboardType="numeric" />
+                <TextInput placeholder="Modelo" placeholderTextColor="#9AA5B4" style={s.input} value={modelo} onChangeText={setModelo} />
+                <TextInput placeholder="Placa" placeholderTextColor="#9AA5B4" style={s.input} value={placa} onChangeText={setPlaca} />
+                <TextInput placeholder="KM Inicial" placeholderTextColor="#9AA5B4" style={s.input} value={kmAtual} onChangeText={setKmAtual} keyboardType="numeric" />
               </>
             ) : (
               <>
-                <TextInput placeholder="Nome" style={s.input} value={nome} onChangeText={setNome} />
-                <TextInput placeholder="E-mail" style={s.input} value={email} onChangeText={setEmail} />
+                <TextInput placeholder="Nome" placeholderTextColor="#9AA5B4" style={s.input} value={nome} onChangeText={setNome} />
+                <TextInput placeholder="E-mail" placeholderTextColor="#9AA5B4" style={s.input} value={email} onChangeText={setEmail} />
                 
                 {/* CAMPO DE SENHA COM OLHINHO */}
                 <View style={s.inputSenhaContainer}>
-                  <TextInput 
-                    placeholder="Senha" 
-                    style={{ flex: 1, height: '100%', paddingHorizontal: 15 }} 
-                    value={senha} 
-                    onChangeText={setSenha} 
-                    secureTextEntry={!exibirSenhaCadastro} 
+                  <TextInput
+                    placeholder="Senha"
+                    placeholderTextColor="#9AA5B4"
+                    style={{ flex: 1, height: '100%', paddingHorizontal: 15, color: '#1A1A2E' }}
+                    value={senha}
+                    onChangeText={setSenha}
+                    secureTextEntry={!exibirSenhaCadastro}
                   />
                   <TouchableOpacity onPress={() => setExibirSenhaCadastro(!exibirSenhaCadastro)} style={{ paddingHorizontal: 12 }}>
                     <Ionicons name={exibirSenhaCadastro ? "eye-off-outline" : "eye-outline"} size={18} color="#003366" />
@@ -740,9 +743,9 @@ export default function GestorScreen({ navigation, route }) {
         <View style={s.modalOverlayCentro}>
           <View style={s.modalCardPerfil}>
             <Text style={s.modalTitulo}>Alterar Senha</Text>
-            <TextInput style={s.input} placeholder="Senha atual" secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} />
-            <TextInput style={s.input} placeholder="Nova senha" secureTextEntry value={novaSenha} onChangeText={setNovaSenha} />
-            <TextInput style={s.input} placeholder="Confirmar nova senha" secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} />
+            <TextInput style={s.input} placeholder="Senha atual" placeholderTextColor="#9AA5B4" secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} />
+            <TextInput style={s.input} placeholder="Nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={novaSenha} onChangeText={setNovaSenha} />
+            <TextInput style={s.input} placeholder="Confirmar nova senha" placeholderTextColor="#9AA5B4" secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} />
             <TouchableOpacity style={s.btnSalvar} onPress={handleAlterarSenha}>
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>SALVAR NOVA SENHA</Text>
             </TouchableOpacity>
@@ -758,25 +761,24 @@ export default function GestorScreen({ navigation, route }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
+  container: { flex: 1, backgroundColor: '#F0F2F5', padding: 20 },
   menuGrid: { marginBottom: 20 },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  cardMenu: { width: '48%', backgroundColor: '#F8F9FA', borderRadius: 15, padding: 15, height: 90, justifyContent: 'center', alignItems: 'center', elevation: 2 },
-  cardRelatorio: { width: '100%', backgroundColor: '#F8F9FA', borderRadius: 15, padding: 15, height: 70, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+  cardMenu: { width: '48%', backgroundColor: '#fff', borderRadius: 15, padding: 15, height: 90, justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  cardRelatorio: { width: '100%', backgroundColor: '#fff', borderRadius: 15, padding: 15, height: 70, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   cardAtivo: { backgroundColor: '#003366' },
   cardTitulo: { fontSize: 14, fontWeight: 'bold', color: '#003366' },
-  buscaContainer: { flexDirection: 'row', backgroundColor: '#F1F3F5', padding: 12, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
-  itemLista: { backgroundColor: '#F8F9FA', padding: 15, borderRadius: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 5, borderLeftColor: '#003366' },
-  itemNome: { fontWeight: 'bold', color: '#333', fontSize: 16 },
+  buscaContainer: { flexDirection: 'row', backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#D0D5DD', padding: 12, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+  itemLista: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 5, borderLeftColor: '#003366' },
+  itemNome: { fontWeight: 'bold', color: '#1A1A2E', fontSize: 16 },
   itemDetalhe: { color: '#666', fontSize: 12 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
   modalForm: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 10 },
   modalConteudo: { backgroundColor: '#fff', borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 25, height: '80%', marginTop: 'auto' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitulo: { fontSize: 20, fontWeight: 'bold', color: '#003366', marginBottom: 15 },
-  input: { backgroundColor: '#F1F3F5', padding: 15, borderRadius: 10, marginBottom: 10 },
-  // ESTILO CORRIGIDO PARA O CAMPO DE SENHA
-  inputSenhaContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F3F5', borderRadius: 10, height: 50, marginBottom: 10 },
+  input: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 10, borderWidth: 1.5, borderColor: '#D0D5DD', color: '#1A1A2E' },
+  inputSenhaContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, height: 52, marginBottom: 10, borderWidth: 1.5, borderColor: '#D0D5DD' },
   btnSalvar: { backgroundColor: '#003366', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 10 },
   btnFlutuante: { position: 'absolute', bottom: 30, right: 30, backgroundColor: '#003366', width: 65, height: 65, borderRadius: 35, justifyContent: 'center', alignItems: 'center', elevation: 10 },
   barraSelecao: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingHorizontal: 4 },

@@ -44,14 +44,14 @@ export const styles = StyleSheet.create({
   modalOverlayCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
   modalCardCustom: { backgroundColor: 'white', padding: 25, borderRadius: 25, elevation: 5 },
   modalTitulo: { fontSize: 20, fontWeight: 'bold', color: COLORS.primary, marginBottom: 20, textAlign: 'center' },
-  inputViagemCustom: { backgroundColor: '#F0F2F5', padding: 15, borderRadius: 12, marginBottom: 15, fontSize: 16 },
+  inputViagemCustom: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 15, fontSize: 16, borderWidth: 1.5, borderColor: '#D0D5DD', color: '#1A1A2E' },
   btnFecharTexto: { color: '#999', fontSize: 14, textAlign: 'center', marginTop: 10 },
 
   modalChecklistContainer: { flex: 1, backgroundColor: '#F0F2F5', padding: 20 },
   modalTituloChecklist: { fontSize: 22, fontWeight: 'bold', color: COLORS.primary, textAlign: 'center', marginTop: 40, marginBottom: 20 },
   formViagem: { backgroundColor: 'white', padding: 20, borderRadius: 20, marginBottom: 15, elevation: 2 },
   labelInput: { fontSize: 14, fontWeight: 'bold', color: '#666', marginBottom: 5 },
-  inputViagem: { backgroundColor: '#F0F2F5', padding: 15, borderRadius: 12, marginBottom: 10, fontSize: 16 },
+  inputViagem: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 10, fontSize: 16, borderWidth: 1.5, borderColor: '#D0D5DD', color: '#1A1A2E' },
   
   itemChecklist: { backgroundColor: 'white', padding: 15, borderRadius: 20, marginBottom: 12, elevation: 2 },
   rowChecklistMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

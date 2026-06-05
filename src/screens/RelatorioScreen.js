@@ -146,7 +146,7 @@ export default function RelatorioScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput 
             style={{ flex: 1, height: 45, marginLeft: 10 }}
-            placeholder="Filtrar por motorista, placa ou carro..."
+            placeholder="Filtrar por motorista, placa ou carro..." placeholderTextColor="#9AA5B4"
             value={filtroTexto}
             onChangeText={aplicarFiltro}
           />
