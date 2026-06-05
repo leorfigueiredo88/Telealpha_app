@@ -3,38 +3,10 @@ import { COLORS } from '../../constants/theme';
 
 export const KEYBOARD_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 
-// Paleta de cores por modo
-export const TEMA = {
-  light: {
-    bg: '#F0F2F5',
-    card: '#FFFFFF',
-    texto: '#1A1A2E',
-    subtitulo: '#666666',
-    inputBg: '#FFFFFF',
-    inputBorda: '#DDDDDD',
-    inputTexto: '#1A1A2E',
-    placeholder: '#999999',
-    icone: '#666666',
-    logoBg: 'transparent',
-  },
-  dark: {
-    bg: '#0D1117',
-    card: '#161B22',
-    texto: '#F0F2F5',
-    subtitulo: '#8B949E',
-    inputBg: '#21262D',
-    inputBorda: '#30363D',
-    inputTexto: '#F0F2F5',
-    placeholder: '#6E7681',
-    icone: '#8B949E',
-    logoBg: 'transparent',
-  },
-};
-
-// Estilos estáticos (layout, sem cor)
-export const layout = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F0F2F5',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -49,20 +21,26 @@ export const layout = StyleSheet.create({
   },
   subtitulo: {
     fontSize: 15,
+    color: '#555',
     textAlign: 'center',
     marginBottom: 32,
   },
   input: {
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
+    borderColor: '#D0D5DD',
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
     marginBottom: 14,
+    color: '#1A1A2E',
   },
   inputSenhaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
+    borderColor: '#D0D5DD',
     borderRadius: 12,
     marginBottom: 22,
   },
@@ -70,6 +48,7 @@ export const layout = StyleSheet.create({
     flex: 1,
     padding: 15,
     fontSize: 16,
+    color: '#1A1A2E',
   },
   eyeIcon: {
     padding: 15,

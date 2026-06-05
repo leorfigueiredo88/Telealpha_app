@@ -11,17 +11,13 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  useColorScheme,
   View
 } from 'react-native';
 
 import { supabase } from '../../services/supabase';
-import { KEYBOARD_BEHAVIOR, TEMA, layout } from './LoginStyles';
+import { KEYBOARD_BEHAVIOR, styles } from './LoginStyles';
 
 export default function LoginScreen({ navigation }) {
-  const scheme = useColorScheme();
-  const t = TEMA[scheme === 'dark' ? 'dark' : 'light'];
-
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [verSenha, setVerSenha] = useState(false);
@@ -63,79 +59,60 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={[layout.container, { backgroundColor: t.bg }]}
+      style={styles.container}
       behavior={KEYBOARD_BEHAVIOR}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          contentContainerStyle={layout.scrollContainer}
+          contentContainerStyle={styles.scrollContainer}
           bounces={false}
           showsVerticalScrollIndicator={false}
         >
           <Image
             source={require('../../../assets/images/logo.png')}
-            style={layout.logo}
+            style={styles.logo}
             resizeMode="contain"
-            // tintColor aplica cor à imagem PNG com canal alpha:
-            // no dark mode deixa a logo visível em branco,
-            // no light mode usa a cor original (undefined = sem filtro)
-            tintColor={scheme === 'dark' ? '#FFFFFF' : undefined}
           />
 
-          <Text style={[layout.subtitulo, { color: t.subtitulo }]}>
-            Faça login para continuar
-          </Text>
+          <Text style={styles.subtitulo}>Faça login para continuar</Text>
 
           <TextInput
             placeholder="E-mail"
-            placeholderTextColor={t.placeholder}
-            style={[layout.input, {
-              backgroundColor: t.inputBg,
-              borderColor: t.inputBorda,
-              color: t.inputTexto,
-            }]}
+            placeholderTextColor="#9AA5B4"
+            style={styles.input}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            keyboardAppearance={scheme === 'dark' ? 'dark' : 'light'}
           />
 
-          <View style={[layout.inputSenhaContainer, {
-            backgroundColor: t.inputBg,
-            borderColor: t.inputBorda,
-          }]}>
+          <View style={styles.inputSenhaContainer}>
             <TextInput
-              style={[layout.inputSenha, { color: t.inputTexto }]}
+              style={styles.inputSenha}
               placeholder="Senha"
-              placeholderTextColor={t.placeholder}
+              placeholderTextColor="#9AA5B4"
               secureTextEntry={!verSenha}
               value={senha}
               onChangeText={setSenha}
-              keyboardAppearance={scheme === 'dark' ? 'dark' : 'light'}
             />
             <TouchableOpacity
               onPressIn={() => setVerSenha(true)}
               onPressOut={() => setVerSenha(false)}
               activeOpacity={0.7}
-              style={layout.eyeIcon}
+              style={styles.eyeIcon}
             >
-              <Ionicons
-                name={verSenha ? "eye" : "eye-off"}
-                size={22}
-                color={t.icone}
-              />
+              <Ionicons name={verSenha ? "eye" : "eye-off"} size={22} color="#9AA5B4" />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={layout.btnEntrar}
+            style={styles.btnEntrar}
             onPress={handleLogin}
             disabled={carregando}
           >
             {carregando
               ? <ActivityIndicator color="#FFF" />
-              : <Text style={layout.btnTexto}>ENTRAR</Text>
+              : <Text style={styles.btnTexto}>ENTRAR</Text>
             }
           </TouchableOpacity>
 
