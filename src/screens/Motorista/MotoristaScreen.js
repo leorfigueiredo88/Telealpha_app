@@ -35,8 +35,10 @@ export default function MotoristaScreen({ navigation, route }) {
   // Estados da Viagem
   const [kmInicial, setKmInicial] = useState('');
   const [destino, setDestino] = useState('');
+  const [dataInicioInput, setDataInicioInput] = useState('');
+  const [horaInicioInput, setHoraInicioInput] = useState('');
   const [kmFinalInformado, setKmFinalInformado] = useState('');
-  const [localChegada, setLocalChegada] = useState(''); 
+  const [localChegada, setLocalChegada] = useState('');
   const [fotosChecklist, setFotosChecklist] = useState({
     'Frente': [], 'Traseira': [], 'Lado Direito': [], 'Lado Esquerdo': []
   });
@@ -105,11 +107,33 @@ export default function MotoristaScreen({ navigation, route }) {
     }
   };
 
+  const mascaraDataViagem = (texto) => {
+    const nums = texto.replace(/\D/g, '').slice(0, 8);
+    if (nums.length <= 2) return nums;
+    if (nums.length <= 4) return `${nums.slice(0,2)}/${nums.slice(2)}`;
+    return `${nums.slice(0,2)}/${nums.slice(2,4)}/${nums.slice(4)}`;
+  };
+
+  const mascaraHora = (texto) => {
+    const nums = texto.replace(/\D/g, '').slice(0, 4);
+    if (nums.length <= 2) return nums;
+    return `${nums.slice(0,2)}:${nums.slice(2)}`;
+  };
+
+  const parsearDataHora = (data, hora) => {
+    const [dia, mes, ano] = data.split('/');
+    const [h, m] = hora.split(':');
+    return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(h), Number(m)).toISOString();
+  };
+
   const abrirChecklist = async (veiculo) => {
     setCarregando(true);
     setVeiculoSelecionado(veiculo);
     setKmInicial(veiculo.km_atual.toString());
     setDestino('');
+    const agora = new Date();
+    setDataInicioInput(`${String(agora.getDate()).padStart(2,'0')}/${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()}`);
+    setHoraInicioInput(`${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`);
     setFotosChecklist({ 'Frente': [], 'Traseira': [], 'Lado Direito': [], 'Lado Esquerdo': [] });
 
     // Busca fotos de TODAS as viagens registradas para este veículo
@@ -135,12 +159,14 @@ export default function MotoristaScreen({ navigation, route }) {
   };
 
   const iniciarRota = async () => {
-    if (!destino) return Alert.alert("Atenção", "Informe o destino.");
+    if (!destino) return Alert.alert("Atenção", "Informe o local de saída.");
+    if (dataInicioInput.length < 10) return Alert.alert("Atenção", "Informe a data no formato DD/MM/AAAA.");
+    if (horaInicioInput.length < 5) return Alert.alert("Atenção", "Informe o horário no formato HH:MM.");
     setCarregando(true);
     try {
       const { data: novaMov, error: errMov } = await supabase.from('movimentacoes').insert([{
         veiculo_placa: veiculoSelecionado.placa,
-        data_inicio: new Date().toISOString(),
+        data_inicio: parsearDataHora(dataInicioInput, horaInicioInput),
         km_inicial: Number(kmInicial),
         motorista_nome: usuarioLogado?.nome,
         destino: destino
@@ -227,6 +253,32 @@ export default function MotoristaScreen({ navigation, route }) {
               <TextInput style={styles.inputViagem} value={kmInicial} editable={false} placeholderTextColor={INPUT.placeholder} />
               <Text style={styles.labelInput}>Local de Saída</Text>
               <TextInput style={styles.inputViagem} value={destino} onChangeText={setDestino} placeholder="Ex: Matriz, Av. Paulista, Depósito..." placeholderTextColor={INPUT.placeholder} />
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.labelInput}>Data de Saída</Text>
+                  <TextInput
+                    style={styles.inputViagem}
+                    value={dataInicioInput}
+                    onChangeText={t => setDataInicioInput(mascaraDataViagem(t))}
+                    placeholder="DD/MM/AAAA"
+                    placeholderTextColor={INPUT.placeholder}
+                    keyboardType="numeric"
+                    maxLength={10}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.labelInput}>Hora de Saída</Text>
+                  <TextInput
+                    style={styles.inputViagem}
+                    value={horaInicioInput}
+                    onChangeText={t => setHoraInicioInput(mascaraHora(t))}
+                    placeholder="HH:MM"
+                    placeholderTextColor={INPUT.placeholder}
+                    keyboardType="numeric"
+                    maxLength={5}
+                  />
+                </View>
+              </View>
             </View>
 
             {Object.keys(fotosChecklist).map((setor) => {
