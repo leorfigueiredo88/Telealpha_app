@@ -39,6 +39,8 @@ export default function MotoristaScreen({ navigation, route }) {
   const [horaInicioInput, setHoraInicioInput] = useState('');
   const [kmFinalInformado, setKmFinalInformado] = useState('');
   const [localChegada, setLocalChegada] = useState('');
+  const [dataFimInput, setDataFimInput] = useState('');
+  const [horaFimInput, setHoraFimInput] = useState('');
   const [fotosChecklist, setFotosChecklist] = useState({
     'Frente': [], 'Traseira': [], 'Lado Direito': [], 'Lado Esquerdo': []
   });
@@ -189,12 +191,23 @@ export default function MotoristaScreen({ navigation, route }) {
     } catch (error) { Alert.alert("Erro", error.message); setCarregando(false); }
   };
 
+  const abrirModalFinalizar = () => {
+    const agora = new Date();
+    setDataFimInput(`${String(agora.getDate()).padStart(2,'0')}/${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()}`);
+    setHoraFimInput(`${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`);
+    setModalFinalizarVisivel(true);
+  };
+
   const finalizarViagemDB = async () => {
     if (!kmFinalInformado) return Alert.alert("Atenção", "Informe o KM final.");
+    if (dataFimInput.length < 10) return Alert.alert("Atenção", "Informe a data no formato DD/MM/AAAA.");
+    if (horaFimInput.length < 5) return Alert.alert("Atenção", "Informe o horário no formato HH:MM.");
     setCarregando(true);
     try {
-      await supabase.from('movimentacoes').update({ 
-        data_fim: new Date().toISOString(), km_final: Number(kmFinalInformado), local_chegada: localChegada 
+      await supabase.from('movimentacoes').update({
+        data_fim: parsearDataHora(dataFimInput, horaFimInput),
+        km_final: Number(kmFinalInformado),
+        local_chegada: localChegada
       }).eq('id', rotaAtiva.id);
       await supabase.from('veiculos').update({ km_atual: Number(kmFinalInformado) }).eq('placa', rotaAtiva.veiculo_placa);
       setModalFinalizarVisivel(false);
@@ -222,7 +235,7 @@ export default function MotoristaScreen({ navigation, route }) {
                 <Text style={styles.txtViagemPlaca}>{rotaAtiva.veiculo_placa}</Text>
                 <View style={styles.badgeRota}><Text style={styles.badgeTexto}>EM TRÂNSITO</Text></View>
              </View>
-             <TouchableOpacity style={styles.btnEncerrarGrande} onPress={() => setModalFinalizarVisivel(true)}>
+             <TouchableOpacity style={styles.btnEncerrarGrande} onPress={abrirModalFinalizar}>
                 <Ionicons name="stop-circle" size={26} color="white" />
                 <Text style={styles.btnTextoEncerrar}>FINALIZAR VIAGEM</Text>
              </TouchableOpacity>
@@ -359,7 +372,37 @@ export default function MotoristaScreen({ navigation, route }) {
       <Modal visible={modalFotoPerfilVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Sua Foto</Text><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={trocarFotoPerfil}><Text style={styles.btnTexto}>GALERIA</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalFotoPerfilVisivel(false)}><Text style={styles.btnFecharTexto}>Fechar</Text></TouchableOpacity></View></View></Modal>
       <Modal visible={modalSenhaVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Alterar Senha</Text><TextInput style={styles.inputViagemCustom} placeholder="Senha atual" placeholderTextColor={INPUT.placeholder} secureTextEntry value={senhaAntiga} onChangeText={setSenhaAntiga} /><TextInput style={styles.inputViagemCustom} placeholder="Nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={novaSenha} onChangeText={setNovaSenha} /><TextInput style={styles.inputViagemCustom} placeholder="Confirme a nova senha" placeholderTextColor={INPUT.placeholder} secureTextEntry value={confirmarSenha} onChangeText={setConfirmarSenha} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={handleAlterarSenha}><Text style={styles.btnTexto}>SALVAR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalSenhaVisivel(false)}><Text style={styles.btnFecharTexto}>Cancelar</Text></TouchableOpacity></View></View></Modal>
       <Modal visible={!!fotoTelaCheia} transparent><View style={styles.fullImageContainer}><TouchableOpacity style={styles.btnCloseFull} onPress={() => setFotoTelaCheia(null)}><Ionicons name="close-circle" size={40} color="white" /></TouchableOpacity><Image source={{ uri: fotoTelaCheia }} style={styles.fullImage} resizeMode="contain" /></View></Modal>
-      <Modal visible={modalFinalizarVisivel} transparent><View style={styles.modalOverlayCenter}><View style={styles.modalCardCustom}><Text style={styles.modalTitulo}>Finalizar Viagem</Text><TextInput style={styles.inputViagemCustom} placeholder="KM Final" placeholderTextColor={INPUT.placeholder} keyboardType="numeric" value={kmFinalInformado} onChangeText={setKmFinalInformado} /><TextInput style={styles.inputViagemCustom} placeholder="Local de chegada" placeholderTextColor={INPUT.placeholder} value={localChegada} onChangeText={setLocalChegada} /><TouchableOpacity style={styles.btnConfirmarIniciar} onPress={finalizarViagemDB}><Text style={styles.btnTexto}>CONCLUIR</Text></TouchableOpacity><TouchableOpacity onPress={() => setModalFinalizarVisivel(false)}><Text style={styles.btnFecharTexto}>Voltar</Text></TouchableOpacity></View></View></Modal>
+      <Modal visible={modalFinalizarVisivel} transparent>
+        <View style={styles.modalOverlayCenter}>
+          <View style={styles.modalCardCustom}>
+            <Text style={styles.modalTitulo}>Finalizar Viagem</Text>
+            <TextInput style={styles.inputViagemCustom} placeholder="KM Final" placeholderTextColor={INPUT.placeholder} keyboardType="numeric" value={kmFinalInformado} onChangeText={setKmFinalInformado} />
+            <TextInput style={styles.inputViagemCustom} placeholder="Local de chegada" placeholderTextColor={INPUT.placeholder} value={localChegada} onChangeText={setLocalChegada} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={[styles.inputViagemCustom, { flex: 1 }]}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={INPUT.placeholder}
+                keyboardType="numeric"
+                maxLength={10}
+                value={dataFimInput}
+                onChangeText={t => setDataFimInput(mascaraDataViagem(t))}
+              />
+              <TextInput
+                style={[styles.inputViagemCustom, { flex: 1 }]}
+                placeholder="HH:MM"
+                placeholderTextColor={INPUT.placeholder}
+                keyboardType="numeric"
+                maxLength={5}
+                value={horaFimInput}
+                onChangeText={t => setHoraFimInput(mascaraHora(t))}
+              />
+            </View>
+            <TouchableOpacity style={styles.btnConfirmarIniciar} onPress={finalizarViagemDB}><Text style={styles.btnTexto}>CONCLUIR</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalFinalizarVisivel(false)}><Text style={styles.btnFecharTexto}>Voltar</Text></TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
