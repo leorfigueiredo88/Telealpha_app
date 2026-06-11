@@ -514,7 +514,7 @@ document.getElementById('l-senha').addEventListener('keydown', e => { if (e.key 
 document.getElementById('l-email').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
 
 async function fazerLogin() {
-  const email = document.getElementById('l-email').value.trim();
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
   const senha = document.getElementById('l-senha').value;
   const erro  = document.getElementById('l-erro');
   const btn   = document.getElementById('btn-login');
@@ -524,13 +524,26 @@ async function fazerLogin() {
 
   btn.disabled = true; btn.textContent = 'Entrando...';
 
-  const { data, error } = await sb.from('usuarios')
-    .select('*').eq('email', email).eq('senha', senha).eq('perfil', 'gestor').maybeSingle();
+  // 1. Autenticação via Supabase Auth
+  const { error: authError } = await sb.auth.signInWithPassword({ email, password: senha });
+
+  if (authError) {
+    btn.disabled = false; btn.textContent = 'Entrar';
+    erro.textContent = 'E-mail ou senha incorretos.';
+    erro.style.display = 'block';
+    return;
+  }
+
+  // 2. Busca perfil (sem campo senha)
+  const { data, error: profileError } = await sb.from('usuarios')
+    .select('id, nome, email, perfil, foto_url')
+    .eq('email', email).eq('perfil', 'gestor').maybeSingle();
 
   btn.disabled = false; btn.textContent = 'Entrar';
 
-  if (error || !data) {
-    erro.textContent = 'E-mail ou senha incorretos, ou usuário sem perfil de gestor.';
+  if (profileError || !data) {
+    await sb.auth.signOut();
+    erro.textContent = 'Usuário sem perfil de gestor.';
     erro.style.display = 'block';
     return;
   }
@@ -548,6 +561,7 @@ async function fazerLogin() {
 }
 
 function sair() {
+  sb.auth.signOut();
   usuario = null;
   document.getElementById('dashboard').style.display   = 'none';
   document.getElementById('login-page').style.display  = 'flex';

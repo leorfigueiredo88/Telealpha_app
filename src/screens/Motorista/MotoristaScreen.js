@@ -91,12 +91,29 @@ export default function MotoristaScreen({ navigation, route }) {
   };
 
   const handleAlterarSenha = async () => {
-    if (senhaAntiga !== usuarioLogado.senha) return Alert.alert("Erro", "Senha atual incorreta.");
+    if (!senhaAntiga || !novaSenha || !confirmarSenha) return Alert.alert("Aviso", "Preencha todos os campos.");
     if (novaSenha !== confirmarSenha) return Alert.alert("Erro", "Senhas não coincidem.");
+    if (novaSenha.length < 6) return Alert.alert("Aviso", "Senha mínimo 6 caracteres.");
+
     setCarregando(true);
-    const { error } = await supabase.from('usuarios').update({ senha: novaSenha }).eq('id', usuarioLogado.id);
+    const { error: reAuthError } = await supabase.auth.signInWithPassword({
+      email: usuarioLogado.email,
+      password: senhaAntiga,
+    });
+    if (reAuthError) {
+      setCarregando(false);
+      return Alert.alert("Erro", "Senha atual incorreta.");
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
     setCarregando(false);
-    if (!error) { Alert.alert("Sucesso", "Senha alterada!"); setModalSenhaVisivel(false); }
+    if (!error) {
+      Alert.alert("Sucesso", "Senha alterada!");
+      setModalSenhaVisivel(false);
+      setSenhaAntiga(''); setNovaSenha(''); setConfirmarSenha('');
+    } else {
+      Alert.alert("Erro", "Falha ao atualizar senha.");
+    }
   };
 
   // Funções de Viagem
@@ -200,6 +217,7 @@ export default function MotoristaScreen({ navigation, route }) {
 
   const finalizarViagemDB = async () => {
     if (!kmFinalInformado) return Alert.alert("Atenção", "Informe o KM final.");
+    if (Number(kmFinalInformado) < rotaAtiva.km_inicial) return Alert.alert("Atenção", `KM final não pode ser menor que o inicial (${rotaAtiva.km_inicial}).`);
     if (dataFimInput.length < 10) return Alert.alert("Atenção", "Informe a data no formato DD/MM/AAAA.");
     if (horaFimInput.length < 5) return Alert.alert("Atenção", "Informe o horário no formato HH:MM.");
     setCarregando(true);
@@ -361,7 +379,7 @@ export default function MotoristaScreen({ navigation, route }) {
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisivel(false); setModalSenhaVisivel(true); }}>
               <Ionicons name="lock-closed-outline" size={22} color={COLORS.primary} /><Text style={styles.menuItemTexto}>Alterar Senha</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItemSair} onPress={() => navigation.replace('Login')}>
+            <TouchableOpacity style={styles.menuItemSair} onPress={async () => { await supabase.auth.signOut(); navigation.replace('Login'); }}>
               <Ionicons name="log-out-outline" size={22} color={COLORS.accent} /><Text style={styles.menuItemTextoSair}>Sair</Text>
             </TouchableOpacity>
           </View>

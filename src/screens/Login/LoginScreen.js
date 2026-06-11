@@ -32,23 +32,34 @@ export default function LoginScreen({ navigation }) {
 
     setCarregando(true);
     try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('email', email.trim())
-        .eq('senha', senha)
-        .single();
+      // 1. Autenticação via Supabase Auth (senha nunca vai ao banco em texto puro)
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: senha,
+      });
 
-      if (error || !data) {
+      if (authError) {
         Alert.alert("Falha no Acesso", "E-mail ou senha incorretos.");
-        setCarregando(false);
         return;
       }
 
-      if (data.perfil === 'gestor') {
-        navigation.replace('Gestor', { usuario: data });
+      // 2. Busca o perfil (sem o campo senha)
+      const { data: profile, error: profileError } = await supabase
+        .from('usuarios')
+        .select('id, nome, email, perfil, foto_url')
+        .eq('email', email.trim().toLowerCase())
+        .single();
+
+      if (profileError || !profile) {
+        await supabase.auth.signOut();
+        Alert.alert("Erro", "Perfil de usuário não encontrado.");
+        return;
+      }
+
+      if (profile.perfil === 'gestor') {
+        navigation.replace('Gestor', { usuario: profile });
       } else {
-        navigation.replace('Motorista', { usuario: data });
+        navigation.replace('Motorista', { usuario: profile });
       }
 
     } catch (err) {

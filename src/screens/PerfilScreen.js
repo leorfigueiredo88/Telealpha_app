@@ -43,7 +43,7 @@ export default function PerfilScreen({ route }) {
   }, []);
 
   const carregarDadosPerfil = async () => {
-    const { data } = await supabase.from('usuarios').select('*').eq('id', usuarioId).single();
+    const { data } = await supabase.from('usuarios').select('id, nome, email, perfil, foto_url').eq('id', usuarioId).single();
     if (data) {
       setDadosUsuario(data);
       setFotoLocal(data.foto_url);
@@ -93,12 +93,22 @@ export default function PerfilScreen({ route }) {
 
   const handleUpdateSenha = async () => {
     if (!senhaAtual || !novaSenha || !confirmarSenha) return Alert.alert("Aviso", "Preencha todos os campos.");
-    if (senhaAtual !== dadosUsuario.senha) return Alert.alert("Erro", "Senha atual incorreta.");
     if (novaSenha !== confirmarSenha) return Alert.alert("Aviso", "As novas senhas não coincidem.");
     if (novaSenha.length < 6) return Alert.alert("Aviso", "A nova senha deve ter no mínimo 6 dígitos.");
 
     setCarregando(true);
-    const { error } = await supabase.from('usuarios').update({ senha: novaSenha }).eq('id', usuarioId);
+
+    // Verifica senha atual via re-autenticação
+    const { error: reAuthError } = await supabase.auth.signInWithPassword({
+      email: dadosUsuario.email,
+      password: senhaAtual,
+    });
+    if (reAuthError) {
+      setCarregando(false);
+      return Alert.alert("Erro", "Senha atual incorreta.");
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
 
     if (error) {
       Alert.alert("Erro", "Falha ao atualizar senha.");
@@ -106,7 +116,6 @@ export default function PerfilScreen({ route }) {
       Alert.alert("Sucesso", "Senha alterada com sucesso!");
       setExibirFormSenha(false);
       setSenhaAtual(''); setNovaSenha(''); setConfirmarSenha('');
-      carregarDadosPerfil();
     }
     setCarregando(false);
   };

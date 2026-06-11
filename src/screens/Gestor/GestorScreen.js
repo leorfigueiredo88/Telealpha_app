@@ -16,8 +16,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { createClient } from '@supabase/supabase-js';
 import { INPUT } from '../../constants/theme';
-import { supabase } from '../../services/supabase';
+import { SUPABASE_KEY, SUPABASE_URL, supabase } from '../../services/supabase';
 import { s } from './GestorStyles';
 
 export default function GestorScreen({ navigation, route }) {
@@ -103,14 +104,24 @@ export default function GestorScreen({ navigation, route }) {
   };
 
   const handleAlterarSenha = async () => {
-    if (senhaAntiga !== usuarioLogado.senha) return Alert.alert("Erro", "Senha atual incorreta.");
+    if (!senhaAntiga || !novaSenha || !confirmarSenha) return Alert.alert("Aviso", "Preencha todos os campos.");
     if (novaSenha !== confirmarSenha) return Alert.alert("Erro", "As novas senhas não coincidem.");
     if (novaSenha.length < 6) return Alert.alert("Aviso", "A nova senha deve ter no mínimo 6 caracteres.");
-    const { error } = await supabase.from('usuarios').update({ senha: novaSenha }).eq('id', usuarioLogado.id);
+
+    // Verifica senha atual via re-autenticação (nunca compara texto puro local)
+    const { error: reAuthError } = await supabase.auth.signInWithPassword({
+      email: usuarioLogado.email,
+      password: senhaAntiga,
+    });
+    if (reAuthError) return Alert.alert("Erro", "Senha atual incorreta.");
+
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
     if (!error) {
       Alert.alert("Sucesso", "Senha alterada!");
       setModalSenhaVisivel(false);
       setSenhaAntiga(''); setNovaSenha(''); setConfirmarSenha('');
+    } else {
+      Alert.alert("Erro", "Falha ao atualizar senha.");
     }
   };
 
@@ -147,19 +158,47 @@ export default function GestorScreen({ navigation, route }) {
 
   const salvarCadastro = async () => {
     try {
-      const tabela = abaAtiva === 'veiculos' ? 'veiculos' : 'usuarios';
-      const payload = abaAtiva === 'veiculos' 
-        ? { modelo, placa, km_atual: Number(kmAtual) } 
-        : { nome, email, senha, perfil: 'motorista' };
+      if (abaAtiva === 'veiculos') {
+        if (!modelo || !placa || !kmAtual) return Alert.alert("Atenção", "Preencha todos os campos.");
+        const placaLimpa = placa.replace(/\s/g, '').toUpperCase();
+        if (placaLimpa.length < 7) return Alert.alert("Atenção", "Placa inválida — mínimo 7 caracteres (ex: ABC1D23).");
+        if (isNaN(Number(kmAtual)) || Number(kmAtual) < 0) return Alert.alert("Atenção", "KM inválido.");
 
-      let res;
-      if (itemSendoEditado) {
-        res = await supabase.from(tabela).update(payload).eq('id', itemSendoEditado.id);
+        const payload = { modelo, placa: placaLimpa, km_atual: Number(kmAtual) };
+        const res = itemSendoEditado
+          ? await supabase.from('veiculos').update(payload).eq('id', itemSendoEditado.id)
+          : await supabase.from('veiculos').insert([payload]);
+        if (res.error) throw res.error;
+
       } else {
-        res = await supabase.from(tabela).insert([payload]);
-      }
+        if (!nome || !email) return Alert.alert("Atenção", "Preencha nome e e-mail.");
+        if (!itemSendoEditado && !senha) return Alert.alert("Atenção", "Informe a senha para o novo motorista.");
+        if (!itemSendoEditado && senha.length < 6) return Alert.alert("Atenção", "Senha mínimo 6 caracteres.");
 
-      if (res.error) throw res.error;
+        if (!itemSendoEditado) {
+          // Cria usuário no Supabase Auth via cliente separado (não afeta sessão do gestor)
+          const tempClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+          });
+          const { error: authError } = await tempClient.auth.signUp({
+            email: email.trim().toLowerCase(),
+            password: senha,
+          });
+          if (authError) throw authError;
+
+          // Insere perfil sem campo senha
+          const { error: profileError } = await supabase.from('usuarios').insert([{
+            nome, email: email.trim().toLowerCase(), perfil: 'motorista',
+          }]);
+          if (profileError) throw profileError;
+        } else {
+          // Edição: atualiza apenas dados de perfil
+          const { error } = await supabase.from('usuarios')
+            .update({ nome, email: email.trim().toLowerCase() })
+            .eq('id', itemSendoEditado.id);
+          if (error) throw error;
+        }
+      }
 
       Alert.alert("Sucesso", "Dados salvos com sucesso!");
       fecharModalCadastro();
@@ -189,7 +228,7 @@ export default function GestorScreen({ navigation, route }) {
     } else {
       setNome(item.nome);
       setEmail(item.email);
-      setSenha(item.senha);
+      // Nunca carrega senha — alteração de senha via Supabase Auth
     }
     setModalVisivel(true);
   };
@@ -542,22 +581,24 @@ export default function GestorScreen({ navigation, route }) {
             ) : (
               <>
                 <TextInput placeholder="Nome" placeholderTextColor={INPUT.placeholder} style={s.input} value={nome} onChangeText={setNome} />
-                <TextInput placeholder="E-mail" placeholderTextColor={INPUT.placeholder} style={s.input} value={email} onChangeText={setEmail} />
-                
-                {/* CAMPO DE SENHA COM OLHINHO */}
-                <View style={s.inputSenhaContainer}>
-                  <TextInput
-                    placeholder="Senha"
-                    placeholderTextColor={INPUT.placeholder}
-                    style={{ flex: 1, height: '100%', paddingHorizontal: 15, color: '#1A1A2E' }}
-                    value={senha}
-                    onChangeText={setSenha}
-                    secureTextEntry={!exibirSenhaCadastro}
-                  />
-                  <TouchableOpacity onPress={() => setExibirSenhaCadastro(!exibirSenhaCadastro)} style={{ paddingHorizontal: 12 }}>
-                    <Ionicons name={exibirSenhaCadastro ? "eye-off-outline" : "eye-outline"} size={18} color="#003366" />
-                  </TouchableOpacity>
-                </View>
+                <TextInput placeholder="E-mail" placeholderTextColor={INPUT.placeholder} style={s.input} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+
+                {/* Campo de senha apenas para NOVO motorista */}
+                {!itemSendoEditado && (
+                  <View style={s.inputSenhaContainer}>
+                    <TextInput
+                      placeholder="Senha (mín. 6 caracteres)"
+                      placeholderTextColor={INPUT.placeholder}
+                      style={{ flex: 1, height: '100%', paddingHorizontal: 15, color: '#1A1A2E' }}
+                      value={senha}
+                      onChangeText={setSenha}
+                      secureTextEntry={!exibirSenhaCadastro}
+                    />
+                    <TouchableOpacity onPress={() => setExibirSenhaCadastro(!exibirSenhaCadastro)} style={{ paddingHorizontal: 12 }}>
+                      <Ionicons name={exibirSenhaCadastro ? "eye-off-outline" : "eye-outline"} size={18} color="#003366" />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </>
             )}
             <TouchableOpacity style={s.btnSalvar} onPress={salvarCadastro}>
@@ -652,7 +693,7 @@ export default function GestorScreen({ navigation, route }) {
               <Text style={s.menuItemTexto}>Alterar Senha</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={s.menuItemSair} onPress={() => navigation.replace('Login')}>
+            <TouchableOpacity style={s.menuItemSair} onPress={async () => { await supabase.auth.signOut(); navigation.replace('Login'); }}>
               <Ionicons name="log-out-outline" size={22} color="#E63946" />
               <Text style={s.menuItemTextoSair}>Sair</Text>
             </TouchableOpacity>
