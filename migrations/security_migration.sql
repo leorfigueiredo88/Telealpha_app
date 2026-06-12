@@ -117,14 +117,19 @@ CREATE POLICY "evidencias_delete_auth" ON evidencias_movimentacao
 -- ─────────────────────────────────────────────────────────────
 
 -- Garante que km_final >= km_inicial ao finalizar uma viagem
+-- NOT VALID = só valida novos registros, não verifica linhas históricas
+ALTER TABLE movimentacoes DROP CONSTRAINT IF EXISTS chk_km_final_valido;
 ALTER TABLE movimentacoes
   ADD CONSTRAINT chk_km_final_valido
-  CHECK (km_final IS NULL OR km_final >= km_inicial);
+  CHECK (km_final IS NULL OR km_final >= km_inicial)
+  NOT VALID;
 
 -- Garante que data_fim >= data_inicio
+ALTER TABLE movimentacoes DROP CONSTRAINT IF EXISTS chk_data_fim_valida;
 ALTER TABLE movimentacoes
   ADD CONSTRAINT chk_data_fim_valida
-  CHECK (data_fim IS NULL OR data_fim >= data_inicio);
+  CHECK (data_fim IS NULL OR data_fim >= data_inicio)
+  NOT VALID;
 
 -- =============================================================
 -- FIM DA MIGRAÇÃO

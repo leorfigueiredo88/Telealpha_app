@@ -324,7 +324,9 @@ export default function GestorScreen({ navigation, route }) {
       const periodoNome = (dataInicio || dataFim)
         ? `${(dataInicio || '').replace(/\//g, '-')}_a_${(dataFim || '').replace(/\//g, '-')}`
         : 'Completo';
-      const nomeArquivoPeriodo = `Relatorio_${periodoNome}`;
+      const agora = new Date();
+      const dataHoraSufixo = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}_${String(agora.getHours()).padStart(2,'0')}h${String(agora.getMinutes()).padStart(2,'0')}`;
+      const nomeArquivoPeriodo = `Relatorio_${periodoNome}_${dataHoraSufixo}`;
       const { uri } = await Print.printToFileAsync({ html });
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: `${nomeArquivoPeriodo}.pdf`, UTI: 'com.adobe.pdf' });
     } catch (e) {
@@ -343,7 +345,9 @@ export default function GestorScreen({ navigation, route }) {
   const gerarPDFIndividual = async (item) => {
     const dataSimples = new Date(item.data_inicio).toLocaleDateString('pt-BR').replace(/\//g, '-');
     const nomeMotorista = item.motorista_nome.replace(/\s+/g, '_');
-    const nomeArquivo = `Relatorio_${nomeMotorista}_${dataSimples}`;
+    const agora = new Date();
+    const dataHoraSufixo = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}_${String(agora.getHours()).padStart(2,'0')}h${String(agora.getMinutes()).padStart(2,'0')}`;
+    const nomeArquivo = `Relatorio_${nomeMotorista}_${dataSimples}_${dataHoraSufixo}`;
 
     const html = `
       <html><body style="font-family: Arial, sans-serif; padding: 20px;">

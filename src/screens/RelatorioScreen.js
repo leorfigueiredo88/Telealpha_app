@@ -122,8 +122,10 @@ export default function RelatorioScreen() {
     `;
 
     try {
+      const agora = new Date();
+      const dataHoraSufixo = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}_${String(agora.getHours()).padStart(2,'0')}h${String(agora.getMinutes()).padStart(2,'0')}`;
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
-      await Sharing.shareAsync(uri);
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: `Relatorio_${dataHoraSufixo}.pdf`, UTI: 'com.adobe.pdf' });
     } catch (e) { Alert.alert("Erro", "Falha ao gerar PDF"); }
   };
 
