@@ -86,6 +86,10 @@ export default function LoginScreen({ navigation }) {
             resizeMode="contain"
           />
 
+          <Text style={styles.appNome}>
+            Frota<Text style={styles.appNomePlus}>+</Text>
+          </Text>
+
           <Text style={styles.subtitulo}>Faça login para continuar</Text>
 
           <TextInput
