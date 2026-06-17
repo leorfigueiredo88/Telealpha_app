@@ -1,12 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { COLORS, INPUT } from '../../constants/theme';
 import { supabase } from '../../services/supabase';
 import { styles } from './MotoristaStyles';
+
+// Configura exibição de notificações com o app aberto
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function MotoristaScreen({ navigation, route }) {
   const usuarioLogado = route.params?.usuario;
@@ -45,6 +55,43 @@ export default function MotoristaScreen({ navigation, route }) {
     'Frente': [], 'Traseira': [], 'Lado Direito': [], 'Lado Esquerdo': []
   });
   const [fotosUltimaViagem, setFotosUltimaViagem] = useState([]);
+
+  // Registra push token para notificações de viagem em aberto
+  useEffect(() => {
+    const registrarPushToken = async () => {
+      try {
+        if (Platform.OS === 'android') {
+          await Notifications.setNotificationChannelAsync('default', {
+            name: 'Alertas de Viagem',
+            importance: Notifications.AndroidImportance.HIGH,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#003366',
+          });
+        }
+
+        const { status: statusAtual } = await Notifications.getPermissionsAsync();
+        let statusFinal = statusAtual;
+        if (statusAtual !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          statusFinal = status;
+        }
+        if (statusFinal !== 'granted') return;
+
+        const tokenData = await Notifications.getExpoPushTokenAsync({
+          projectId: '8317b216-2990-4f6b-90c2-c8c14f471f36',
+        });
+
+        await supabase
+          .from('usuarios')
+          .update({ expo_push_token: tokenData.data })
+          .eq('id', usuarioLogado.id);
+      } catch (e) {
+        console.log('Push token:', e.message);
+      }
+    };
+
+    registrarPushToken();
+  }, []);
 
   const carregarDados = async () => {
     setCarregando(true);

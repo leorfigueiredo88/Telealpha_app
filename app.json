@@ -28,7 +28,10 @@
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "plugins": [
@@ -37,6 +40,14 @@
         {
           "photosPermission": "Permite selecionar fotos da galeria para o perfil e checklist.",
           "cameraPermission": "Permite tirar fotos para o checklist do veículo."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/logo.png",
+          "color": "#003366",
+          "sounds": []
         }
       ]
     ],
