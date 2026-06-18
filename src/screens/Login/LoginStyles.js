@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
   // ── Layout ──────────────────────────────────────────────
   container:       { flex: 1, backgroundColor: COLORS.bg },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 28 },
-  logo:            { width: '80%', height: 140, marginBottom: 4, alignSelf: 'center' },
+  logo:            { width: '80%', height: 140, marginBottom: -10, alignSelf: 'center' },
   appNome:         { fontSize: 36, fontWeight: 'bold', color: '#003366', textAlign: 'center', marginBottom: 6, letterSpacing: 1 },
   appNomePlus:     { color: '#E63946' },
   subtitulo:       { fontSize: 15, color: '#555', textAlign: 'center', marginBottom: 32 },
